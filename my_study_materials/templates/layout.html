@@ -1,0 +1,176 @@
+{% load static %}
+{% load socialaccount %} <!-- socialaccount 태그 라이브러리 로드 -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Study Materials</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'bootstrap-5.3.1-dist/css/bootstrap.min.css' %}"
+    />
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light pt-4">
+      <div class="container-fluid">
+        <!-- Logo -->
+        <a class="navbar-brand ps-5" href="/">My Study<br>Materials</a>
+
+        <!-- Search Bar -->
+        <form class="row g-3">
+          <div class="col-auto">
+            <input
+              class="form-control mr-sm-2"
+              type="search"
+              placeholder="Search"
+              aria-label="Search"
+            />
+          </div>
+          <div class="col-auto">
+            <button class="btn btn-outline-primary my-2 my-sm-0" type="submit">
+              <img
+                src="{% static 'bootstrap-icons-1.10.5/search.svg'%}"
+                alt="search"
+                width="15"
+                height="15"
+              />
+            </button>
+          </div>
+        </form>
+
+        <!-- Profile -->
+        <div class="navbar-nav ml-auto pe-3">
+          <div class="nav-item dropdown">
+               <a class="nav-link" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <img src="{% static 'bootstrap-icons-1.10.5/person-circle.svg'%}" alt="person" width="30" height="30" />
+              </a>
+              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown"> <!-- dropdown 왼쪽 정렬 -->
+                <a class="dropdown-item" href="{% url 'account_login' %}">로그인</a>
+                <a class="dropdown-item" href="{% url 'account_logout' %}">로그아웃</a>
+              </div>
+          </div>
+       </div>
+      </div>
+    </nav>
+    
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Left sidebar -->
+        <div class="col-2 bg-light sidebar py-5">
+          <div class="sidebar-sticky">
+            <ul class="nav flex-column gap-3">
+              <li class="nav-item d-flex justify-content-center gap-3 pb-5">
+                <a class="btn btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#myModal">추가</a>
+                <a class="btn btn-outline-danger" href="#">삭제</a>
+              </li>
+              {% for category in categories %}
+              <li class="nav-item d-flex justify-content-center">
+                  <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
+                  <button class="btn btn-sm btn-danger delete-category-button" data-category-id="{{ category.id }}" style="display: none;">삭제</button>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+        <!-- Content will be inserted here -->
+        <div class="col-7">
+            {% block content %}{% endblock %}
+        </div>
+
+        <!-- Right sidebar -->
+        <div class="col-3 d-flex justify-content-center align-items-center position-fixed" style="height:80vh; right: 0;">
+            <img src="{% static 'images/300x600.png' %}" alt="ad">
+        </div>
+      </div>
+    </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addCategory">카테고리 추가</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="categoryForm">
+            <div class="form-group">
+              <input type="text" class="form-control" id="category-name" name="name" placeholder="카테고리명">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+          <button type="button" class="btn btn-primary" id="saveCategoryBtn">추가하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </body>
+  <!-- Bootstrap JS and jQuery -->
+  <script src="{% static 'bootstrap-5.3.1-dist/js/bootstrap.bundle.min.js' %}"></script>
+  <script>
+    // 카테고리 추가
+    document.addEventListener('DOMContentLoaded', function(){
+      document.querySelector("#saveCategoryBtn").addEventListener('click', function(){
+        var formElement = document.querySelector("#categoryForm");
+        var formData = new FormData(formElement);
+        
+        for (var pair of formData.entries()) {
+          console.log(pair[0] + ', ' + pair[1]); 
+        }
+    
+        fetch("{% url 'category_new' %}", { // Django에서 지정한 URL을 가져옴
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}', // Django의 CSRF 보호를 우회
+          },
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(json => {
+          location.reload();
+        })
+        .catch((error) => {
+          console.log('Error:', error);
+        });
+      });
+    });
+
+    // 카테고리 제거
+    document.addEventListener('DOMContentLoaded', function() {
+      var deleteButtonsVisible = false;
+    
+      document.querySelector('.btn-outline-danger').addEventListener('click', function() {
+        deleteButtonsVisible = !deleteButtonsVisible;
+        document.querySelectorAll('.delete-category-button').forEach(function(button) {
+          button.style.display = deleteButtonsVisible ? 'block' : 'none';
+        });
+      });
+    
+      document.querySelectorAll('.delete-category-button').forEach(function(button) {
+        button.addEventListener('click', function() {
+          var categoryId = this.getAttribute('data-category-id');
+          fetch('/category/' + categoryId + '/delete/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-CSRFToken': '{{ csrf_token }}'
+            },
+          }).then(function() {
+            location.reload();
+          });
+        });
+      });
+    });
+    </script>
+</html>

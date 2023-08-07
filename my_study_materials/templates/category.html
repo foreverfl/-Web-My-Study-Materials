@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block content %}
+<div class="d-flex justify-content-end mt-5 gap-2">
+  <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addClassificationModal">추가</button>
+  <button type="button" class="btn btn-outline-secondary">수정</button>
+  <button type="button" class="btn btn-outline-danger">삭제</button>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addClassificationModal" tabindex="-1" aria-labelledby="addClassificationModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addClassificationModalLabel">목차 추가</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <input type="text" class="form-control" id="classification-name" name="name" placeholder="목차명">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+        <button type="button" class="btn btn-primary" id="saveClassificationBtn">추가하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-5">
+  <h2>{{ category.name }}</h2>
+  <hr>
+  <h3>Classifications</h3>
+  <ul>
+    {% for classification in category.classification_set.all %}
+    <li>{{ classification.name }}</li>
+    {% empty %}
+    <li>No classifications in this category.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<script>
+  document.querySelector('#saveClassificationBtn').addEventListener('click', function() {
+    var classificationName = document.querySelector('#classification-name').value;
+    var data = new URLSearchParams();
+    data.append('name', classificationName);
+    fetch('/add_classification/', {
+      method: 'POST',
+      body: data,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': '{{ csrf_token }}'
+      }
+    }).then(function(response) {
+      if (response.ok) {
+        location.reload();
+      } else {
+        alert('Error: ' + response.statusText);
+      }
+    });
+  });
+</script>
+{% endblock %}
