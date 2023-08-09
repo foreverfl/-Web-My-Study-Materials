@@ -124,7 +124,7 @@
           console.log(pair[0] + ', ' + pair[1]); 
         }
     
-        fetch("{% url 'category_new' %}", { // Django에서 지정한 URL을 가져옴
+        fetch("{% url 'category_create' %}", { // Django에서 지정한 URL을 가져옴
           method: 'POST',
           body: formData,
           headers: {
