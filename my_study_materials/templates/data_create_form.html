@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <form action="{% url 'data_create_form' %}" method="post" class="mt-5">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="name" class="form-label">이름</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+          </div>
+          <div class="mb-3">
+            <label for="concept" class="form-label">개념</label>
+            <input type="text" class="form-control" id="concept" name="concept" required>
+          </div>
+          <div class="mb-3">
+            <label for="features" class="form-label">특징</label>
+            <textarea class="form-control" id="features" name="features" rows="3" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="command" class="form-label">명령어</label>
+            <input type="text" class="form-control" id="command" name="command" required>
+          </div>
+          <div class="mb-3">
+            <label for="frequency" class="form-label">빈도</label>
+            <input type="text" class="form-control" id="frequency" name="frequency" required>
+          </div>
+          <div class="mb-3">
+            <label for="code" class="form-label">코드</label>
+            <textarea class="form-control" id="code" name="code" rows="5" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="others" class="form-label">기타</label>
+            <textarea class="form-control" id="others" name="others" rows="3" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">추가</button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

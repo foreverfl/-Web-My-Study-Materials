@@ -3,9 +3,8 @@
 
 {% block content %}
 <div class="d-flex justify-content-end mt-5 gap-2">
-  <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addClassificationModal">추가</button>
-  <button type="button" class="btn btn-outline-secondary">수정</button>
-  <button type="button" class="btn btn-outline-danger">삭제</button>
+  <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addClassificationModal">목차 추가</button>
+  <button type="button" class="btn btn-outline-danger" id="classificationDeleteBtn">목차 삭제</button>
 </div>
 
 <!-- Modal -->
@@ -32,22 +31,25 @@
 <div class="container mt-5">
   <h2>{{ category.name }}</h2>
   <hr>
-  <h3>Classifications</h3>
-  <ul>
+  <ul class="list-group" id="classificationList">
     {% for classification in category.classification_set.all %}
-    <li>{{ classification.name }}</li>
+      <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        <a class="text-decoration-none" href="{% url 'classification_detail' classification.id %}">{{ classification.name }}</a>
+        <button type="button" class="btn btn-danger btn-sm delete-button" style="display: none;" id="deleteButton{{ classification.id }}">삭제</button>        
+      </li>
     {% empty %}
-    <li>No classifications in this category.</li>
+      <li class="list-group-item text-muted">현재 목록이 존재하지 않습니다.</li>
     {% endfor %}
   </ul>
 </div>
 
 <script>
+  // 저장
   document.querySelector('#saveClassificationBtn').addEventListener('click', function() {
     var classificationName = document.querySelector('#classification-name').value;
     var data = new URLSearchParams();
     data.append('name', classificationName);
-    fetch('/add_classification/', {
+    fetch("{% url 'classification_create' category_id=category.id %}", {
       method: 'POST',
       body: data,
       headers: {
@@ -62,5 +64,49 @@
       }
     });
   });
+
+  // 삭제
+  document.getElementById('classificationDeleteBtn').addEventListener('click', function() {
+    var classificationList = document.getElementById('classificationList').querySelectorAll('li');
+    for (var i = 0; i < classificationList.length; i++) {
+      var button = classificationList[i].querySelector('.delete-button');
+      if (button) {
+        var display = button.style.display;
+        button.style.display = display === 'none' ? 'inline' : 'none';
+      }
+    }
+  });
+
+  // 각 삭제 버튼에 대한 이벤트 리스너 등록
+  {% for classification in category.classification_set.all %}
+  document.getElementById('deleteButton{{ classification.id }}').addEventListener('click', function() {
+    deleteClassification({{ classification.id }});
+  });
+  {% endfor %}
+
+  function deleteClassification(classificationId) {
+    var url = '/classification/' + classificationId + '/delete/'; // 삭제 URL
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        document.getElementById('deleteButton' + classificationId).closest('.list-group-item').remove();
+      } else {
+        // 실패 시 에러 메시지 표시
+        alert('삭제 실패: ' + data.error);
+      }
+    })
+    .catch(error => {
+      console.error('에러 발생:', error);
+      alert('삭제 중 오류가 발생했습니다.');
+    });
+  }
 </script>
 {% endblock %}

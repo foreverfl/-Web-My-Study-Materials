@@ -8,24 +8,34 @@ urlpatterns = [
     path('layout/', views.layout_view, name='layout'),
 
     # Category
+    path('category/create/', views.category_create, name='category_create'),
     path('category/<int:category_id>/',
          views.category_detail, name='category_detail'),
     path('categories/', views.category_list, name='category_list'),
-    path('category/new/', views.category_new, name='category_new'),
     path('category/<int:category_id>/delete/',
          views.category_delete, name='category_delete'),
 
     # Classification
+    path('classification/create/<int:category_id>/>', views.classification_create,
+         name='classification_create'),
     path('classifications/', views.classification_list,
          name='classification_list'),
     path('classification/<int:classification_id>/',
          views.classification_detail, name='classification_detail'),
-    path('classification/new/', views.classification_create,
-         name='classification_new'),
-    path('classification/<int:classification_id>/update/',
-         views.classification_update, name='classification_update'),
     path('classification/<int:classification_id>/delete/',
          views.classification_delete, name='classification_delete'),
 
     # Data
+    path('data/create_form/', views.data_create_form,
+         name='data_create_form'),
+    path('data/create/', views.data_create,
+         name='data_create'),
+    path('data/', views.data_list,
+         name='data_list'),
+    path('data/<int:data_id>/',
+         views.data_detail, name='data_detail'),
+    path('data/update/<int:data_id>/',
+         views.data_update, name='data_update'),
+    path('data/delete/<int:data_id>/',
+         views.data_delete, name='data_delete'),
 ]
