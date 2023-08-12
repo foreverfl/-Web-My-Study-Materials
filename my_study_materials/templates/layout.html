@@ -19,11 +19,13 @@
         <a class="navbar-brand ps-5" href="/">My Study<br>Materials</a>
 
         <!-- Search Bar -->
-        <form class="row g-3">
+        <form class="row g-3" action="{% url 'search' %}" method="get">
           <div class="col-auto">
             <input
               class="form-control mr-sm-2"
-              type="search"
+              type="text"
+              name="q"
+              value="{{ request.GET.q }}"
               placeholder="Search"
               aria-label="Search"
             />

@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>검색 결과</h1>
+    <div class="row">
+        <div class="col-12">
+            <h3>이름</h3>
+            {% if name_results %}
+                <ul>
+                    {% for result in name_results %}
+                        <li>{{ result.nam|linebreaks }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>이름에 해당하는 검색 결과가 없습니다.</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <h3>특징</h3>
+            {% if features_results %}
+                <ul>
+                    {% for result in features_results %}
+                        <li>{{ result.features|linebreaks }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>특징에 해당하는 검색 결과가 없습니다.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

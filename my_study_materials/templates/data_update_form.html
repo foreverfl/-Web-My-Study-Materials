@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container m-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+        <form action="{% url 'data_update' classification_id=classification_id data_id=data.id %}" method="post" class="mt-5">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-3"> <!-- 이 부분은 열의 크기를 조절하므로 필요에 따라 변경할 수 있습니다. -->
+                    <div class="mb-3">
+                        <label for="frequency" class="form-label">빈도</label>
+                        <div class="input-group">
+                            <button type="button" class="btn btn-outline-secondary" id="decreaseFrequency">-</button>
+                            <input type="input" class="form-control text-center" id="frequency" name="frequency" value="{{ data.frequency }}" required readonly>
+                            <button type="button" class="btn btn-outline-secondary" id="increaseFrequency">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+            <label for="name" class="form-label">이름</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ data.name }}" required>
+            </div>
+            <div class="mb-3">
+            <label for="concept" class="form-label">개념</label>
+            <textarea type="text" class="form-control" id="concept" name="concept" rows="10">{{ data.concept }}</textarea>
+            </div>
+            <div class="mb-3">
+            <label for="features" class="form-label">특징</label>
+            <textarea class="form-control" id="features" name="features" rows="10">{{ data.features }}</textarea>
+            </div>
+            <div class="mb-3">
+            <label for="command" class="form-label">명령어</label>
+            <textarea type="text" class="form-control" id="command" name="command" rows="10">{{ data.command }}</textarea>
+            </div>
+            <div class="mb-3">
+            <label for="code" class="form-label">코드</label>
+            <textarea class="form-control" id="code" name="code" rows="10">{{ data.code }}</textarea>
+            </div>
+            <div class="mb-3">
+            <label for="others" class="form-label">기타</label>
+            <textarea class="form-control" id="others" name="others" rows="5">{{ data.others }}</textarea>
+            </div>
+            <div class="row justify-content-center pt-3">
+            <button type="submit" class="btn btn-primary col-3">수정</button>
+            </div>
+        </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function changeFrequency(value) {
+        var frequencyInput = document.getElementById('frequency');
+        var currentFrequency = parseInt(frequencyInput.value, 10);
+        var newFrequency = currentFrequency + value; // 새로운 빈도 계산
+        // 빈도가 1 이상 5 이하인지 확인
+        if (newFrequency >= 1 && newFrequency <= 5) {
+            frequencyInput.value = newFrequency;
+        }
+    }
+
+    // 감소 버튼에 클릭 이벤트 리스너 추가
+    document.getElementById('decreaseFrequency').addEventListener('click', function() {
+        changeFrequency(-1);
+    });
+
+    // 증가 버튼에 클릭 이벤트 리스너 추가
+    document.getElementById('increaseFrequency').addEventListener('click', function() {
+        changeFrequency(1);
+    });
+</script>
+{% endblock %}

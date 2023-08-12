@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="d-flex justify-content-end mt-5 gap-2">
-  <a href="{% url 'data_create_form' %}">
+  <a href="{% url 'data_create_form' classification_id=classification_id %}">
     <button type="button" class="btn btn-outline-primary">데이터 추가</button>
   </a>
 </div>
@@ -12,10 +12,9 @@
   <h2>{{ classification.name }}</h2>
   <hr>
   <ul class="list-group" id="classificationList">
-    {% for classification in classification.classification_set.all %}
+    {% for data in data_list %}
       <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-        {{ classification.name }}
-        <button type="button" class="btn btn-danger btn-sm delete-button" style="display: none;" id="deleteButton{{ classification.id }}">삭제</button>        
+        <a class="text-decoration-none" href="{% url 'data_detail' classification_id=classification.id data_id=data.id %}">{{ data.name }}</a>
       </li>
     {% empty %}
       <li class="list-group-item text-muted">현재 내용이 존재하지 않습니다.</li>

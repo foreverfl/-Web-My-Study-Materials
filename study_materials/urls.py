@@ -26,16 +26,21 @@ urlpatterns = [
          views.classification_delete, name='classification_delete'),
 
     # Data
-    path('data/create_form/', views.data_create_form,
+    path('classification/<int:classification_id>/data/create_form/', views.data_create_form,
          name='data_create_form'),
-    path('data/create/', views.data_create,
+    path('classification/<int:classification_id>/data/create/', views.data_create,
          name='data_create'),
     path('data/', views.data_list,
          name='data_list'),
-    path('data/<int:data_id>/',
+    path('classification/<int:classification_id>/data/<int:data_id>/',
          views.data_detail, name='data_detail'),
-    path('data/update/<int:data_id>/',
+    path('classification/<int:classification_id>/data/<int:data_id>/update_form/',
+         views.data_update_form, name='data_update_form'),
+    path('classification/<int:classification_id>/data/<int:data_id>/update/',
          views.data_update, name='data_update'),
-    path('data/delete/<int:data_id>/',
+    path('classification/<int:classification_id>/data/<int:data_id>/delete',
          views.data_delete, name='data_delete'),
+
+    # Search
+    path('search/', views.search, name='search'),
 ]

@@ -23,6 +23,12 @@ class Data(models.Model):  # Data 테이블
     concept = models.TextField()
     features = models.TextField()
     command = models.TextField()
-    frequency = models.TextField()
+    frequency = models.IntegerField()
     code = models.TextField()
     others = models.TextField()
+
+    def save(self, *args, **kwargs):
+        if self.frequency > 5:
+            self.frequency = 5
+
+        super(Data, self).save(*args, **kwargs)

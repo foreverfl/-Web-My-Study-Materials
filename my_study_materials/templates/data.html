@@ -1,7 +1,33 @@
 {% extends "layout.html" %}
 {% load static %}
 
-<div class="d-flex justify-content-end mt-5 gap-2">
-    <button type="button" class="btn btn-outline-secondary">데이터 수정</button>
-    <button type="button" class="btn btn-outline-danger">데이터 삭제</button>
+{% block content %}
+<form action="{% url 'data_delete' classification_id=classification_id data_id=data_id %}" method="post" id="deleteForm">
+  {% csrf_token %}
+  <div class="d-flex justify-content-end mt-5 gap-2">
+      <a href="{% url 'data_update_form' classification_id=classification_id data_id=data_id %}">
+          <button type="button" class="btn btn-outline-secondary">데이터 수정</button>
+      </a>
+      <button type="submit" class="btn btn-outline-danger">데이터 삭제</button>
   </div>
+</form>
+
+<div class="container mt-5">
+  <p class="fs-3">{{ stars }}</p>
+  <h1 class="fs-1">{{ name }}</h1>
+  <hr style="border-width: 3px;">
+  {% if concept %}<p class="fs-3"><strong>개념</strong> {{ concept|linebreaks }}</p><hr>{% endif %}
+  {% if features %}<p class="fs-3"><strong>특징</strong> {{ features|linebreaks }}</p><hr>{% endif %}
+  {% if command %}<p class="fs-3"><strong>명령어</strong> {{ command|linebreaks }}</p><hr>{% endif %}
+  {% if code %}<p class="fs-3"><strong>코드</strong> {{ code|linebreaks }}</p><hr>{% endif %}
+  {% if others %}<p class="fs-3"><strong>기타</strong> {{ others|linebreaks }}</p><hr>{% endif %}
+</div>
+
+<script>
+document.getElementById('deleteForm').addEventListener('submit', function (event) {
+  if (!confirm('정말로 삭제하시겠습니까?')) {
+      event.preventDefault(); // 서버로의 POST 요청을 막음
+  }
+});
+</script>
+{% endblock %}

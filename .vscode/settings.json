@@ -1,4 +1,10 @@
 {
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
   "[python]": {
     "editor.defaultFormatter": "ms-python.autopep8"
   },

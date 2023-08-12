@@ -69,8 +69,16 @@ def classification_list(request):
 
 def classification_detail(request, classification_id):
     classification = get_object_or_404(Classification, pk=classification_id)
-    classifications = Classification.objects.all()
-    return render(request, 'classification.html', {'classifications': classifications, 'classification': classification})
+    # classification에 해당하는 Data 객체 가져오기
+    data_list = Data.objects.filter(classification=classification)
+    print("classification_id", classification_id)
+
+    context = {
+        'classification': classification,
+        'classification_id': classification_id,
+        'data_list': data_list  # Data 객체 목록을 템플릿에 전달
+    }
+    return render(request, 'classification.html', context)
 
 
 @require_POST
@@ -84,26 +92,38 @@ def classification_delete(request, classification_id):
 
 
 # Data
-def data_create_form(request):
-    return render(request, 'data_create_form.html')
+def data_create_form(request, classification_id):
+    context = {
+        'classification_id': classification_id,
+    }
+    return render(request, 'data_create_form.html', context)
 
 
 @require_POST
-def data_create(request):
-    classification_id = request.POST.get('classification_id')
-    classification = get_object_or_404(Classification, pk=classification_id)
+def data_create(request, classification_id):
+    # 폼에서 전송된 데이터 가져오기
+    name = request.POST['name']
+    concept = request.POST['concept']
+    features = request.POST['features']
+    command = request.POST['command']
+    code = request.POST['code']
+    others = request.POST['others']
 
-    data = Data.objects.create(
-        classification=classification,
-        name=request.POST.get('name'),
-        concept=request.POST.get('concept'),
-        features=request.POST.get('features'),
-        command=request.POST.get('command'),
-        frequency=request.POST.get('frequency'),
-        code=request.POST.get('code'),
-        others=request.POST.get('others'),
+    # Data 객체 생성 및 저장
+    data = Data(
+        classification=Classification.objects.get(pk=classification_id),
+        name=name,
+        concept=concept,
+        features=features,
+        command=command,
+        frequency=1,
+        code=code,
+        others=others
     )
-    return JsonResponse({"status": "success"}, status=201)
+    data.save()
+
+    # 저장 후 해당 데이터의 세부 페이지로 리다이렉션
+    return redirect('data_detail', classification_id=classification_id, data_id=data.id)
 
 
 def data_list(request):
@@ -112,9 +132,10 @@ def data_list(request):
     return JsonResponse(data, safe=False)
 
 
-def data_detail(request, data_id):
+def data_detail(request, classification_id, data_id):
     data = get_object_or_404(Data, pk=data_id)
-    response_data = {
+    stars = '☆' * data.frequency
+    context = {
         'name': data.name,
         'concept': data.concept,
         'features': data.features,
@@ -122,26 +143,73 @@ def data_detail(request, data_id):
         'frequency': data.frequency,
         'code': data.code,
         'others': data.others,
+        'classification_id': classification_id,
+        'data_id': data_id,
+        'stars': stars,
     }
-    return JsonResponse(response_data)
+    return render(request, 'data.html', context)
+
+
+def data_update_form(request, classification_id, data_id):
+    data = get_object_or_404(Data, pk=data_id)
+
+    context = {
+        'data': data,
+        'classification_id': classification_id,
+    }
+
+    return render(request, 'data_update_form.html', context)
 
 
 @require_POST
-def data_update(request, data_id):
+def data_update(request, classification_id, data_id):
     data = get_object_or_404(Data, pk=data_id)
     data.name = request.POST.get('name')
     data.concept = request.POST.get('concept')
     data.features = request.POST.get('features')
     data.command = request.POST.get('command')
-    data.frequency = request.POST.get('frequency')
+    data.frequency = int(request.POST.get('frequency'))
     data.code = request.POST.get('code')
     data.others = request.POST.get('others')
     data.save()
-    return JsonResponse({"status": "success"})
+
+    # 저장 후 상세 페이지로 리다이렉션
+    return redirect('data_detail', classification_id=classification_id, data_id=data_id)
 
 
 @require_POST
-def data_delete(request, data_id):
-    data = get_object_or_404(Data, pk=data_id)
-    data.delete()
-    return JsonResponse({"status": "success"})
+def data_delete(request, classification_id, data_id):
+    data = get_object_or_404(Data, pk=data_id)  # 해당 data_id를 가진 객체를 찾음
+    data.delete()  # 객체 삭제
+    return redirect('classification_detail', classification_id=classification_id)
+
+# Search
+
+
+def search(request):
+
+    query = request.GET.get('q', '')  # 검색어 가져오기
+    print(query)
+
+    # 각 필드별로 검색 진행
+    name_results = Data.objects.filter(name__icontains=query)
+    concept_results = Data.objects.filter(concept__icontains=query)
+    features_results = Data.objects.filter(features__icontains=query)
+    command_results = Data.objects.filter(command__icontains=query)
+    frequency_results = Data.objects.filter(frequency__contains=query)
+    code_results = Data.objects.filter(code__icontains=query)
+    others_results = Data.objects.filter(others__icontains=query)
+
+    print(name_results)
+
+    context = {
+        'name_results': name_results,
+        'concept_results': concept_results,
+        'features_results': features_results,
+        'command_results': command_results,
+        'frequency_results': frequency_results,
+        'code_results': code_results,
+        'others_results': others_results,
+    }
+
+    return render(request, 'search.html', context)
