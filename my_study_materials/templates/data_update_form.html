@@ -5,7 +5,7 @@
 <div class="container m-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-        <form action="{% url 'data_update' classification_id=classification_id data_id=data.id %}" method="post" class="mt-5">
+        <form action="{% url 'data_update' category_id=category_id classification_id=classification_id data_id=data.id %}" method="post" class="mt-5">
             {% csrf_token %}
             <div class="row">
                 <div class="col-md-3"> <!-- 이 부분은 열의 크기를 조절하므로 필요에 따라 변경할 수 있습니다. -->

@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.db.models import Q
 from .models import Category, Classification, Data
 from .forms import CategoryForm, ClassificationForm, DataForm
 
@@ -9,11 +10,6 @@ from .forms import CategoryForm, ClassificationForm, DataForm
 def index_view(request):
     categories = Category.objects.all()
     return render(request, 'index.html', {'categories': categories})
-
-
-def layout_view(request):
-    categories = Category.objects.all()
-    return render(request, 'layout.html', {'categories': categories})
 
 
 # Category
@@ -31,7 +27,11 @@ def category_create(request):
 def category_detail(request, category_id):
     category = get_object_or_404(Category, pk=category_id)
     categories = Category.objects.all()
-    return render(request, 'category.html', {'categories': categories, 'category': category})
+    context = {
+        'categories': categories,
+        'category': category
+    }
+    return render(request, 'category.html', context)
 
 
 def category_list(request):
@@ -67,13 +67,14 @@ def classification_list(request):
     return JsonResponse(list(classifications.values()), safe=False)
 
 
-def classification_detail(request, classification_id):
+def classification_detail(request, category_id, classification_id):
+    category = get_object_or_404(Category, pk=category_id)
     classification = get_object_or_404(Classification, pk=classification_id)
-    # classification에 해당하는 Data 객체 가져오기
+    # Data 모델에서 classification 필드의 값이 변수 classification과 일치하는 객체들을 필터링하여 가져옴
     data_list = Data.objects.filter(classification=classification)
-    print("classification_id", classification_id)
-
     context = {
+        'category': category,
+        'category_id': category_id,
         'classification': classification,
         'classification_id': classification_id,
         'data_list': data_list  # Data 객체 목록을 템플릿에 전달
@@ -92,15 +93,16 @@ def classification_delete(request, classification_id):
 
 
 # Data
-def data_create_form(request, classification_id):
+def data_create_form(request, category_id, classification_id):
     context = {
+        'category_id': category_id,
         'classification_id': classification_id,
     }
     return render(request, 'data_create_form.html', context)
 
 
 @require_POST
-def data_create(request, classification_id):
+def data_create(request, category_id, classification_id):
     # 폼에서 전송된 데이터 가져오기
     name = request.POST['name']
     concept = request.POST['concept']
@@ -123,16 +125,10 @@ def data_create(request, classification_id):
     data.save()
 
     # 저장 후 해당 데이터의 세부 페이지로 리다이렉션
-    return redirect('data_detail', classification_id=classification_id, data_id=data.id)
+    return redirect('data_detail', category_id=category_id, classification_id=classification_id, data_id=data.id)
 
 
-def data_list(request):
-    data_list = Data.objects.all()
-    data = [{'id': item.id, 'name': item.name} for item in data_list]
-    return JsonResponse(data, safe=False)
-
-
-def data_detail(request, classification_id, data_id):
+def data_detail(request, category_id, classification_id, data_id):
     data = get_object_or_404(Data, pk=data_id)
     stars = '☆' * data.frequency
     context = {
@@ -143,6 +139,7 @@ def data_detail(request, classification_id, data_id):
         'frequency': data.frequency,
         'code': data.code,
         'others': data.others,
+        'category_id': category_id,
         'classification_id': classification_id,
         'data_id': data_id,
         'stars': stars,
@@ -150,11 +147,12 @@ def data_detail(request, classification_id, data_id):
     return render(request, 'data.html', context)
 
 
-def data_update_form(request, classification_id, data_id):
+def data_update_form(request, category_id, classification_id, data_id):
     data = get_object_or_404(Data, pk=data_id)
 
     context = {
         'data': data,
+        'category_id': category_id,
         'classification_id': classification_id,
     }
 
@@ -162,7 +160,7 @@ def data_update_form(request, classification_id, data_id):
 
 
 @require_POST
-def data_update(request, classification_id, data_id):
+def data_update(request, category_id, classification_id, data_id):
     data = get_object_or_404(Data, pk=data_id)
     data.name = request.POST.get('name')
     data.concept = request.POST.get('concept')
@@ -174,14 +172,15 @@ def data_update(request, classification_id, data_id):
     data.save()
 
     # 저장 후 상세 페이지로 리다이렉션
-    return redirect('data_detail', classification_id=classification_id, data_id=data_id)
+    return redirect('data_detail', category_id=category_id, classification_id=classification_id, data_id=data_id)
 
 
 @require_POST
-def data_delete(request, classification_id, data_id):
+def data_delete(request, category_id, classification_id, data_id):
     data = get_object_or_404(Data, pk=data_id)  # 해당 data_id를 가진 객체를 찾음
     data.delete()  # 객체 삭제
-    return redirect('classification_detail', classification_id=classification_id)
+    return redirect('classification_detail', category_id=category_id, classification_id=classification_id)
+
 
 # Search
 
@@ -192,24 +191,22 @@ def search(request):
     print(query)
 
     # 각 필드별로 검색 진행
-    name_results = Data.objects.filter(name__icontains=query)
-    concept_results = Data.objects.filter(concept__icontains=query)
-    features_results = Data.objects.filter(features__icontains=query)
-    command_results = Data.objects.filter(command__icontains=query)
-    frequency_results = Data.objects.filter(frequency__contains=query)
-    code_results = Data.objects.filter(code__icontains=query)
-    others_results = Data.objects.filter(others__icontains=query)
+    # icontains: 대소문자를 구분하지 않는 포함 검색
+    # distinct(): 중복된 결과를 제거
+    results = Data.objects.filter(
+        Q(name__icontains=query) |
+        Q(concept__icontains=query) |
+        Q(features__icontains=query) |
+        Q(command__icontains=query) |
+        Q(frequency__contains=query) |
+        Q(code__icontains=query) |
+        Q(others__icontains=query)
+    ).distinct()
 
-    print(name_results)
+    print(results)
 
     context = {
-        'name_results': name_results,
-        'concept_results': concept_results,
-        'features_results': features_results,
-        'command_results': command_results,
-        'frequency_results': frequency_results,
-        'code_results': code_results,
-        'others_results': others_results,
+        'results': results,
     }
 
     return render(request, 'search.html', context)

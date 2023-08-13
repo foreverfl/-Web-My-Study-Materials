@@ -49,11 +49,14 @@
                   <img src="{% static 'bootstrap-icons-1.10.5/person-circle.svg'%}" alt="person" width="30" height="30" />
               </a>
               <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown"> <!-- dropdown 왼쪽 정렬 -->
-                <a class="dropdown-item" href="{% url 'account_login' %}">로그인</a>
-                <a class="dropdown-item" href="{% url 'account_logout' %}">로그아웃</a>
+                {% if user.is_authenticated %}
+                  <a class="dropdown-item" href="{% url 'account_logout' %}">로그아웃</a>
+                {% else %}
+                  <a class="dropdown-item" href="{% url 'account_login' %}">로그인</a>
+                {% endif %}
               </div>
           </div>
-       </div>
+        </div>
       </div>
     </nav>
     
@@ -63,10 +66,12 @@
         <div class="col-2 bg-light sidebar py-5">
           <div class="sidebar-sticky">
             <ul class="nav flex-column gap-3">
-              <li class="nav-item d-flex justify-content-center gap-3 pb-5">
-                <a class="btn btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#myModal">추가</a>
-                <a class="btn btn-outline-danger" href="#">삭제</a>
-              </li>
+              {% if show_buttons %}
+                <li class="nav-item d-flex justify-content-center gap-3 pb-5">
+                  <a class="btn btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#myModal">추가</a>
+                  <a class="btn btn-outline-danger" href="#" id="deleteCategoryBtn">삭제</a>
+                </li>
+              {% endif %}
               {% for category in categories %}
               <li class="nav-item d-flex justify-content-center">
                   <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
@@ -118,6 +123,7 @@
   <script>
     // 카테고리 추가
     document.addEventListener('DOMContentLoaded', function(){
+      
       document.querySelector("#saveCategoryBtn").addEventListener('click', function(){
         var formElement = document.querySelector("#categoryForm");
         var formData = new FormData(formElement);
@@ -150,9 +156,14 @@
 
     // 카테고리 제거
     document.addEventListener('DOMContentLoaded', function() {
+      var deleteCategoryBtn = document.querySelector('#deleteCategoryBtn');
+      if(!deleteCategoryBtn) {
+        return;
+      }
+    
       var deleteButtonsVisible = false;
     
-      document.querySelector('.btn-outline-danger').addEventListener('click', function() {
+      document.querySelector('#deleteCategoryBtn').addEventListener('click', function() {
         deleteButtonsVisible = !deleteButtonsVisible;
         document.querySelectorAll('.delete-category-button').forEach(function(button) {
           button.style.display = deleteButtonsVisible ? 'block' : 'none';

@@ -1,5 +1,8 @@
+{% load static %}
 <!-- socialaccount 태그 라이브러리를 로드. 이 태그 라이브러리는 소셜 계정과 관련된 템플릿 태그와 필터를 제공. -->
 {% load socialaccount %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
 <!-- get_providers 템플릿 태그를 사용하여 사용 가능한 모든 소셜 계정 공급자를 가져옴. 이 템플릿 태그는 socialaccount_providers라는 이름의 변수에 공급자 리스트를 저장함. -->
 {% get_providers as socialaccount_providers %}
@@ -18,9 +21,11 @@
   {% endfor %}
   {% endif %}
 
-  <li>
+  <li class="list-group-item">
     <!-- provider_login_url 템플릿 태그를 사용하여 해당 공급자의 로그인 URL을 생성. -->
-    <a title="{{provider.name}}" class="socialaccount_provider {{provider.id}}"
-       href="{% provider_login_url provider.id process=process scope=scope auth_params=auth_params %}">{{provider.name}}</a>
+    <a title="{{provider.name}}" class="text-decoration-none {{provider.id}}>"
+       href="{% provider_login_url provider.id process=process scope=scope auth_params=auth_params %}">
+       <i class="fab fa-{{ provider.id }}"></i>Sign in with {{provider.name}}      
+    </a>
   </li>
 {% endfor %}

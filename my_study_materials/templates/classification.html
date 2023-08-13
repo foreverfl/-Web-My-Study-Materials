@@ -2,19 +2,22 @@
 {% load static %}
 
 {% block content %}
+{% if show_buttons %}
 <div class="d-flex justify-content-end mt-5 gap-2">
-  <a href="{% url 'data_create_form' classification_id=classification_id %}">
+  <a href="{% url 'data_create_form' category_id=category_id classification_id=classification_id %}">
     <button type="button" class="btn btn-outline-primary">데이터 추가</button>
   </a>
 </div>
+{% endif %}
+
 
 <div class="container mt-5">
-  <h2>{{ classification.name }}</h2>
+  <h2>{{category.name}}>{{ classification.name }}</h2>
   <hr>
   <ul class="list-group" id="classificationList">
     {% for data in data_list %}
       <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-        <a class="text-decoration-none" href="{% url 'data_detail' classification_id=classification.id data_id=data.id %}">{{ data.name }}</a>
+        <a class="text-decoration-none" href="{% url 'data_detail' category_id=category_id classification_id=classification.id data_id=data.id %}">{{ data.name }}</a>
       </li>
     {% empty %}
       <li class="list-group-item text-muted">현재 내용이 존재하지 않습니다.</li>
