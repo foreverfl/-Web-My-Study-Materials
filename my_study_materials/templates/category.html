@@ -87,7 +87,8 @@
   {% endfor %}
 
   function deleteClassification(classificationId) {
-    var url = '/classification/' + classificationId + '/delete/'; // 삭제 URL
+    var categoryId = {{ category.id }};
+    var url = '/category/' + categoryId + '/classification/' + classificationId + '/delete/'; // 삭제 URL
 
     fetch(url, {
       method: 'POST',

@@ -83,7 +83,7 @@ def classification_detail(request, category_id, classification_id):
 
 
 @require_POST
-def classification_delete(request, classification_id):
+def classification_delete(request, category_id, classification_id):
     try:
         classification = Classification.objects.get(pk=classification_id)
         classification.delete()
