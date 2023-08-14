@@ -192,7 +192,6 @@ def data_delete(request, category_id, classification_id, data_id):
 def search(request):
 
     query = request.GET.get('q', '')  # 검색어 가져오기
-    print(query)
 
     # 각 필드별로 검색 진행
     # icontains: 대소문자를 구분하지 않는 포함 검색
