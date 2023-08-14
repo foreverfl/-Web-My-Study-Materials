@@ -1,5 +1,9 @@
 from django.urls import path, include
 from . import views
+from django.urls import re_path
+from django.views.static import serve
+from django.conf import settings
+import os
 
 urlpatterns = [
     path('', views.index_view, name='index'),  # update this line
@@ -40,4 +44,11 @@ urlpatterns = [
 
     # Search
     path('search/', views.search, name='search'),
+
+    # adsense
+    re_path(r'^ads\.txt$', serve, {
+        'path': 'ads.txt',
+        'document_root': os.path.join(settings.STATICFILES_DIRS[0]),
+    })
+
 ]
