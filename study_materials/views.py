@@ -5,6 +5,10 @@ from django.views.decorators.http import require_POST
 from django.db.models import Q
 from .models import Category, Classification, Data
 from .forms import CategoryForm, ClassificationForm, DataForm
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def index_view(request):
@@ -203,7 +207,7 @@ def search(request):
         Q(others__icontains=query)
     ).distinct()
 
-    print(results)
+    logger.info(query)
 
     context = {
         'results': results,
