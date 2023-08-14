@@ -1,2 +1,5 @@
 /my_study_materials/settings.py
 __pycache__/
+access.log
+error.log
+myenv/
