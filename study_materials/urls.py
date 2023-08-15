@@ -1,9 +1,15 @@
+from django.contrib.sitemaps.views import sitemap
+from .sitemaps import StudyMaterialsSitemap
 from django.urls import path, include
 from . import views
 from django.urls import re_path
 from django.views.static import serve
 from django.conf import settings
 import os
+
+sitemaps = {
+    'study_materials': StudyMaterialsSitemap,
+}
 
 urlpatterns = [
     path('', views.index_view, name='index'),  # update this line
@@ -49,6 +55,10 @@ urlpatterns = [
     re_path(r'^ads\.txt$', serve, {
         'path': 'ads.txt',
         'document_root': os.path.join(settings.STATICFILES_DIRS[0]),
-    })
+    }),
+
+    # sitemap
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
+         name='django.contrib.sitemaps.views.sitemap'),
 
 ]
