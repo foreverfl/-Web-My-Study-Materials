@@ -3,6 +3,9 @@
 # 로그 파일 경로 설정
 LOGFILE="/var/log/site.log"
 
+# 현재 실행 시간 기록
+echo "$(date) : Script executed" >> $LOGFILE
+
 # 리포지토리 경로로 이동
 cd /home/ec2-user/-Web-My-Study-Materials
 
