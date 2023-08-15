@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 로그 파일 경로 설정
-LOGFILE="/path/to/your/logfile.log"
+LOGFILE="/var/log/site.log"
 
 # 리포지토리 경로로 이동
 cd /home/ec2-user/-Web-My-Study-Materials
