@@ -1,11 +1,17 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-from django.db.models import Q
-from .models import Category, Classification, Data
-from .forms import CategoryForm, ClassificationForm, DataForm
 import logging
+from datetime import timezone
+
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+from markdownx.utils import markdownify
+
+from .forms import CategoryForm, ClassificationForm, DataForm
+from .models import Notice, Category, Classification, Data
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -13,27 +19,104 @@ logger = logging.getLogger(__name__)
 
 def index_view(request):
     categories = Category.objects.all()
-    return render(request, 'index.html', {'categories': categories})
+    notices = Notice.objects.all().order_by('-date')  # 날짜 내림차순으로 정렬
+    context = {
+        'categories': categories,
+        'notices': notices,
+    }
+    return render(request, 'index.html', context)
+
+
+def notice_create_form(request):
+    return render(request, 'notice_create_form.html')
+
+
+@require_POST
+def notice_create(request):  # Notice 생성
+    title = request.POST.get('title')
+    content = request.POST.get('content')
+    notice = Notice(title=title, content=content,
+                    user=request.user, date=timezone.now())
+    notice.save()
+    return redirect('notice_detail', notice_id=notice.id)
+
+
+def notice_detail(request, notice_id):  # Notice 상세보기
+    notice = get_object_or_404(Notice, pk=notice_id)
+    notice.content = markdownify(notice.content)  # Markdown 형식의 내용을 HTML로 변환
+    context = {
+        'notice': notice
+    }
+    return render(request, 'notice.html', context)
+
+
+@login_required
+def notice_update_form(request, notice_id):
+    notice = get_object_or_404(Notice, pk=notice_id)
+
+    # 권한 검사 (글 작성자 혹은 관리자만 수정 가능하도록)
+    if request.user != notice.user and not request.user.is_superuser:
+        return redirect('some_error_page')  # 권한 없음 오류 페이지로 리다이렉션
+
+    context = {
+        'notice': notice
+    }
+    return render(request, 'notice_update_form.html', context)
+
+
+@require_POST
+def notice_update(request, notice_id):  # Notice 수정
+    notice = get_object_or_404(Notice, pk=notice_id)
+    notice.title = request.POST.get('title')
+    notice.content = request.POST.get('content')
+    notice.save()
+    return redirect('notice_detail', notice_id=notice.id)
+
+
+def notice_delete(request, notice_id):  # Notice 삭제
+    notice = get_object_or_404(Notice, pk=notice_id)
+    notice.delete()
+    # index는 목록 페이지로 돌아가는 URL 패턴의 이름이어야 함
+    return HttpResponseRedirect(reverse('index'))
 
 
 # Category
+
 @require_POST
+@login_required
 def category_create(request):
     form = CategoryForm(request.POST)
-    if form.is_valid():
-        # 데이터가 조건을 모두 만족하면, form 인스턴스의 save 메소드를 호출하여 해당 데이터를 DB에 저장.
-        form.save()
+    category = form.save(commit=False)
+    category.user = request.user  # user 필드에 현재 로그인된 사용자 할당
+    if form.is_valid():  # user 필드가 필수가 아니므로 이 시점에서 유효성 검사 가능
+        category.save()
         return JsonResponse({"status": "success"}, status=201)
     else:
         return JsonResponse({"status": "error", "errors": form.errors}, status=400)
 
 
+@require_POST
+def category_update(request):
+    print('test')
+    for index in range(len(request.POST)//2):
+        category_id = request.POST.get(f'category_id_{index}')
+        category_name = request.POST.get(f'category_name_{index}')
+        category = get_object_or_404(Category, id=category_id)
+        category.name = category_name
+        category.save()
+
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse('index')))
+
+
 def category_detail(request, category_id):
     category = get_object_or_404(Category, pk=category_id)
     categories = Category.objects.all()
+    classifications = Classification.objects.filter(category=category)
+    print(classifications)
     context = {
         'categories': categories,
-        'category': category
+        'category': category,
+        'classifications': classifications
     }
     return render(request, 'category.html', context)
 
@@ -87,6 +170,19 @@ def classification_detail(request, category_id, classification_id):
 
 
 @require_POST
+def classification_update(request, category_id):
+    for index in range(len(request.POST)//2):
+        classification_id = request.POST.get(f'classification_id_{index}')
+        classification_name = request.POST.get(f'classification_name_{index}')
+        classification = get_object_or_404(
+            Classification, id=classification_id)
+        classification.name = classification_name
+        classification.save()
+
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse('index')))
+
+
+@require_POST
 def classification_delete(request, category_id, classification_id):
     try:
         classification = Classification.objects.get(pk=classification_id)
@@ -109,22 +205,15 @@ def data_create_form(request, category_id, classification_id):
 def data_create(request, category_id, classification_id):
     # 폼에서 전송된 데이터 가져오기
     name = request.POST['name']
-    concept = request.POST['concept']
-    features = request.POST['features']
-    command = request.POST['command']
-    code = request.POST['code']
-    others = request.POST['others']
+    description = request.POST['description']
+    frequency = 1  # frequency는 1로 설정하거나 다른 방식으로 처리할 수 있습니다.
 
     # Data 객체 생성 및 저장
     data = Data(
         classification=Classification.objects.get(pk=classification_id),
         name=name,
-        concept=concept,
-        features=features,
-        command=command,
-        frequency=1,
-        code=code,
-        others=others
+        description=description,
+        frequency=frequency
     )
     data.save()
 
@@ -133,20 +222,23 @@ def data_create(request, category_id, classification_id):
 
 
 def data_detail(request, category_id, classification_id, data_id):
+    category = get_object_or_404(Category, pk=category_id)  # category 쿼리
+    classification = get_object_or_404(
+        Classification, pk=classification_id)  # classification 쿼리
     data = get_object_or_404(Data, pk=data_id)
     stars = '☆' * data.frequency
+    # markdownify 함수를 사용하여 Markdown 형식으로 변환
+    description = markdownify(data.description)
     context = {
         'name': data.name,
-        'concept': data.concept,
-        'features': data.features,
-        'command': data.command,
+        'description': description,
         'frequency': data.frequency,
-        'code': data.code,
-        'others': data.others,
         'category_id': category_id,
         'classification_id': classification_id,
         'data_id': data_id,
         'stars': stars,
+        'category': category,
+        'classification': classification,
     }
     return render(request, 'data.html', context)
 
@@ -167,12 +259,8 @@ def data_update_form(request, category_id, classification_id, data_id):
 def data_update(request, category_id, classification_id, data_id):
     data = get_object_or_404(Data, pk=data_id)
     data.name = request.POST.get('name')
-    data.concept = request.POST.get('concept')
-    data.features = request.POST.get('features')
-    data.command = request.POST.get('command')
+    data.description = request.POST.get('description')
     data.frequency = int(request.POST.get('frequency'))
-    data.code = request.POST.get('code')
-    data.others = request.POST.get('others')
     data.save()
 
     # 저장 후 상세 페이지로 리다이렉션

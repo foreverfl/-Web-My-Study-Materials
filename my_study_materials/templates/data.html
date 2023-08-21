@@ -15,15 +15,22 @@
 </form>
 {% endif %}
 
+
+<h2 class="container mt-5">
+  <strong>
+    [분류] 
+    <a class="text-decoration-none text-body" href="{% url 'category_detail' category_id=category.id %}">{{ category.name }}</a> &gt;
+    <a class="text-decoration-none text-body" href="{% url 'classification_detail' category_id=category.id classification_id=classification.id %}">{{ classification.name }}</a>
+  </strong>
+</h2>
+
 <div class="container mt-5">
   <p class="fs-3">{{ stars }}</p>
-  <h1 class="fs-1">{{ name }}</h1>
-  <hr style="border-width: 3px;">
-  {% if concept %}<p class="fs-3"><strong>개념</strong> {{ concept|linebreaks }}</p><hr>{% endif %}
-  {% if features %}<p class="fs-3"><strong>특징</strong> {{ features|linebreaks }}</p><hr>{% endif %}
-  {% if command %}<p class="fs-3"><strong>명령어</strong> {{ command|linebreaks }}</p><hr>{% endif %}
-  {% if code %}<p class="fs-3"><strong>코드</strong> {{ code|linebreaks }}</p><hr>{% endif %}
-  {% if others %}<p class="fs-3"><strong>기타</strong> {{ others|linebreaks }}</p><hr>{% endif %}
+  {% if name %}<p class="fs-3"><strong>{{ name }}</strong></p><hr>{% endif %}
+  {% if description %}
+    <p class="fs-3"><strong>설명</strong></p>
+    {{ description|safe }}
+  {% endif %}
 </div>
 
 <script>

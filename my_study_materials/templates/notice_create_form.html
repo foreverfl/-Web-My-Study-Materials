@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-8">
+            <div class="card">
+                <div class="card-header text-center">
+                    공지사항 작성
+                </div>
+                <div class="card-body">
+                    <form action="{% url 'notice_create' %}" method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="title" class="form-label">제목</label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="content" class="form-label">내용</label>
+                            <textarea class="form-control" id="content" name="content" rows="20" required></textarea>
+                        </div>
+                        <div class="row justify-content-center">
+                            <button type="submit" class="btn btn-primary col-2">등록</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

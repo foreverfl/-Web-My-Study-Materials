@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-{% if show_buttons %}
+{% if user.is_authenticated %}
 <div class="d-flex justify-content-end mt-5 gap-2">
   <a href="{% url 'data_create_form' category_id=category_id classification_id=classification_id %}">
     <button type="button" class="btn btn-outline-primary">데이터 추가</button>

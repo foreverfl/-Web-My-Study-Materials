@@ -12,15 +12,31 @@ sitemaps = {
 }
 
 urlpatterns = [
-    path('', views.index_view, name='index'),  # update this line
+    path('', views.index_view, name='index'),
     # allauth 라이브러리에서 제공하는 모든 url 패턴을 포함
     path('accounts/', include('allauth.urls')),
+
+    # Notice
+    path('notice/create_form/', views.notice_create_form,
+         name='notice_create_form'),
+    path('notice/create/', views.notice_create,
+         name='notice_create'),
+    path('notice/<int:notice_id>/', views.notice_detail,
+         name='notice_detail'),
+    path('notice/<int:notice_id>/update_form/', views.notice_update_form,
+         name='notice_update_form'),
+    path('notice/<int:notice_id>/update/', views.notice_update,
+         name='notice_update'),
+    path('notice/<int:notice_id>/delete/', views.notice_delete,
+         name='notice_delete'),
 
     # Category
     path('category/create/', views.category_create, name='category_create'),
     path('category/<int:category_id>/',
          views.category_detail, name='category_detail'),
     path('categories/', views.category_list, name='category_list'),
+    path('category/update/',
+         views.category_update, name='category_update'),
     path('category/<int:category_id>/delete/',
          views.category_delete, name='category_delete'),
 
@@ -31,6 +47,8 @@ urlpatterns = [
          name='classification_list'),
     path('category/<int:category_id>/classification/<int:classification_id>/',
          views.classification_detail, name='classification_detail'),
+    path('category/<int:category_id>/classification/update',
+         views.classification_update, name='classification_update'),
     path('category/<int:category_id>/classification/<int:classification_id>/delete/',
          views.classification_delete, name='classification_delete'),
 

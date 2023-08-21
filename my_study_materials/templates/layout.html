@@ -5,14 +5,16 @@
 <html>
   <head>
     <title>My Study Materials</title>
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
     <link
       rel="stylesheet"
       href="{% static 'bootstrap-5.3.1-dist/css/bootstrap.min.css' %}"
     />
     <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/pygments.css' %}">
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4751026650729929"
-     crossorigin="anonymous"></script>
+    {% comment %} <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4751026650729929"
+     crossorigin="anonymous"></script> {% endcomment %}
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light pt-4">
@@ -68,9 +70,10 @@
         <div class="col-2 bg-light sidebar py-5">
           <div class="sidebar-sticky">
             <ul class="nav flex-column gap-3">
-              {% if show_buttons %}
+              {% if user.is_authenticated %}
                 <li class="nav-item d-flex justify-content-center gap-3 pb-5">
-                  <a class="btn btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#myModal">추가</a>
+                  <a class="btn btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#categoryCreateModal">추가</a>
+                  <a class="btn btn-outline-secondary" href="#" data-bs-toggle="modal" data-bs-target="#categoryUpdateModal">수정</a>
                   <a class="btn btn-outline-danger" href="#" id="deleteCategoryBtn">삭제</a>
                 </li>
               {% endif %}
@@ -97,7 +100,8 @@
     </div>
 
   <!-- Modal -->
-  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <!-- Create Category-->
+  <div class="modal fade" id="categoryCreateModal" tabindex="-1" role="dialog" aria-labelledby="categoryCreateModal" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -119,7 +123,35 @@
     </div>
   </div>
 
+  <!-- Update Category-->  
+  <div class="modal fade" id="categoryUpdateModal" tabindex="-1" aria-labelledby="categoryUpdateModal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">카테고리 수정</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="CategoryUpdateForm" method="post" action="{% url 'category_update' %}">
+              {% csrf_token %}
+              {% for category in categories %}
+              <div class="mb-3">
+                <!-- forloop.counter0: Django 템플릿 태그에서 사용되는 반복문의 카운터변수 -->
+                <input type="hidden" name="category_id_{{ forloop.counter0 }}" value="{{ category.id }}">
+                <input type="text" class="form-control" id="categoryName" name="category_name_{{ forloop.counter0 }}" value="{{ category.name }}" required>
+              </div>
+              {% endfor %}
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+            <button type="submit" class="btn btn-primary" form="CategoryUpdateForm">저장</button>
+          </div>
+        </div>
+      </div>
+    </div> 
   </body>
+
   <!-- Bootstrap JS and jQuery -->
   <script src="{% static 'bootstrap-5.3.1-dist/js/bootstrap.bundle.min.js' %}"></script>
   <script>
@@ -156,6 +188,7 @@
       });
     });
 
+
     // 카테고리 제거
     document.addEventListener('DOMContentLoaded', function() {
       var deleteCategoryBtn = document.querySelector('#deleteCategoryBtn');
@@ -164,9 +197,10 @@
       }
     
       var deleteButtonsVisible = false;
-    
+
       document.querySelector('#deleteCategoryBtn').addEventListener('click', function() {
         deleteButtonsVisible = !deleteButtonsVisible;
+        deleteCategoryBtn.textContent = deleteButtonsVisible ? '취소' : '삭제'; // 텍스트 값 변경
         document.querySelectorAll('.delete-category-button').forEach(function(button) {
           button.style.display = deleteButtonsVisible ? 'block' : 'none';
         });

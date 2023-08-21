@@ -20,31 +20,17 @@
                 </div>
             </div>
             <div class="mb-3">
-            <label for="name" class="form-label">이름</label>
-            <input type="text" class="form-control" id="name" name="name" value="{{ data.name }}" required>
+                <label for="name" class="form-label">개념</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ data.name }}" required>
             </div>
+ 
             <div class="mb-3">
-            <label for="concept" class="form-label">개념</label>
-            <textarea type="text" class="form-control" id="concept" name="concept" rows="10">{{ data.concept }}</textarea>
+                <label for="features" class="form-label">설명</label>
+                <textarea class="form-control" id="description" name="description" rows="30">{{ data.description|safe }}</textarea>
             </div>
-            <div class="mb-3">
-            <label for="features" class="form-label">특징</label>
-            <textarea class="form-control" id="features" name="features" rows="10">{{ data.features }}</textarea>
-            </div>
-            <div class="mb-3">
-            <label for="command" class="form-label">명령어</label>
-            <textarea type="text" class="form-control" id="command" name="command" rows="10">{{ data.command }}</textarea>
-            </div>
-            <div class="mb-3">
-            <label for="code" class="form-label">코드</label>
-            <textarea class="form-control" id="code" name="code" rows="10">{{ data.code }}</textarea>
-            </div>
-            <div class="mb-3">
-            <label for="others" class="form-label">기타</label>
-            <textarea class="form-control" id="others" name="others" rows="5">{{ data.others }}</textarea>
-            </div>
+
             <div class="row justify-content-center pt-3">
-            <button type="submit" class="btn btn-primary col-3">수정</button>
+                <button type="submit" class="btn btn-primary col-3">수정</button>
             </div>
         </form>
         </div>
