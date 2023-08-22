@@ -86,9 +86,10 @@ def notice_delete(request, notice_id):  # Notice 삭제
 @login_required
 def category_create(request):
     form = CategoryForm(request.POST)
-    category = form.save(commit=False)
-    category.user = request.user  # user 필드에 현재 로그인된 사용자 할당
+    form.user = request.user
     if form.is_valid():  # user 필드가 필수가 아니므로 이 시점에서 유효성 검사 가능
+        category = form.save(commit=False)
+        category.user = request.user  # user 필드에 현재 로그인된 사용자 할당
         category.save()
         return JsonResponse({"status": "success"}, status=201)
     else:

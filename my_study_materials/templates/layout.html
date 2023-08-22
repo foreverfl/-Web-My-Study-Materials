@@ -70,6 +70,7 @@
         <div class="col-2 bg-light sidebar py-5">
           <div class="sidebar-sticky">
             <ul class="nav flex-column gap-3">
+              <!-- CRUD -->
               {% if user.is_authenticated %}
                 <li class="nav-item d-flex justify-content-center gap-3 pb-5">
                   <a class="btn btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#categoryCreateModal">추가</a>
@@ -77,10 +78,20 @@
                   <a class="btn btn-outline-danger" href="#" id="deleteCategoryBtn">삭제</a>
                 </li>
               {% endif %}
-              {% for category in categories %}
+              <!--User Category -->
+              {% for category in current_user_categories %}
               <li class="nav-item d-flex justify-content-center">
                   <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
                   <button class="btn btn-sm btn-danger delete-category-button" data-category-id="{{ category.id }}" style="display: none;">삭제</button>
+              </li>
+              {% endfor %}
+
+              <hr>
+
+              <!-- Admin Category -->
+              {% for category in admin_categories %}
+              <li class="nav-item d-flex justify-content-center">
+                  <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
               </li>
               {% endfor %}
             </ul>
@@ -174,8 +185,12 @@
           },
         })
         .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+          if (!response.ok) { // response.ok가 false일 때 (즉, HTTP 상태 코드가 200~299가 아닐 때)
+            return response.json().then(json => {
+              // 오류 메시지를 받아 처리할 수 있습니다.
+              alert(json.errors || "카테고리를 추가하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
+              throw new Error(`HTTP error! status: ${response.status}`);
+            
           }
           return response.json();
         })

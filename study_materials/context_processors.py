@@ -1,23 +1,18 @@
+from django.contrib.auth.models import User
 from .models import Category
-from allauth.socialaccount.models import SocialAccount
 
 
 def common_context(request):
-    uid = "103090984604653702161"  # 운영자 uid
-    show_buttons = False
+    current_user_categories = Category.objects.none()  # 빈 쿼리셋으로 초기화+
+    # __: 외래키 필드를 참조할 때 사용
+    admin_categories = Category.objects.filter(user__is_superuser=True)
 
     if request.user.is_authenticated:
-        try:
-            social_account = SocialAccount.objects.get(
-                user=request.user, uid=uid)
-            show_buttons = True
-        except SocialAccount.DoesNotExist:
-            pass
+        current_user_categories = Category.objects.filter(user=request.user)
 
-    categories = Category.objects.all()
     context = {
-        'categories': categories,
-        'show_buttons': show_buttons
+        'current_user_categories': current_user_categories,
+        'admin_categories': admin_categories
     }
 
     return context

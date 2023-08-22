@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from .models import Notice, Category, Classification, Data
 
@@ -14,6 +15,13 @@ class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
         fields = ['name']
+
+    def clean_name(self):  # 필드의 유효성 검사
+        name = self.cleaned_data['name']
+        user = self.user
+        if Category.objects.filter(name=name, user=user).exists():
+            raise ValidationError("category already exists")
+        return name
 
 
 class ClassificationForm(forms.ModelForm):
