@@ -97,7 +97,6 @@ def category_create(request):
 
 @require_POST
 def category_update(request):
-    print('test')
     for index in range(len(request.POST)//2):
         category_id = request.POST.get(f'category_id_{index}')
         category_name = request.POST.get(f'category_name_{index}')
@@ -109,10 +108,10 @@ def category_update(request):
 
 
 def category_detail(request, category_id):
+    logger.info('test')
     category = get_object_or_404(Category, pk=category_id)
     categories = Category.objects.all()
     classifications = Classification.objects.filter(category=category)
-    print(classifications)
     context = {
         'categories': categories,
         'category': category,
