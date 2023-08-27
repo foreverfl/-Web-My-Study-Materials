@@ -34,7 +34,6 @@ urlpatterns = [
     path('category/create/', views.category_create, name='category_create'),
     path('category/<int:category_id>/',
          views.category_detail, name='category_detail'),
-    path('categories/', views.category_list, name='category_list'),
     path('category/update/',
          views.category_update, name='category_update'),
     path('category/<int:category_id>/delete/',
@@ -68,6 +67,13 @@ urlpatterns = [
 
     # Search
     path('search/', views.search, name='search'),
+
+    # payment
+    path('payment/describe', views.payment_describe, name='payment_describe'),
+    path('payment/', views.payment, name='payment'),
+    path('payment/success/', views.payment_success, name='payment_success'),
+    path('payment/fail/', views.payment_fail, name='payment_fail'),
+
 
     # adsense
     re_path(r'^ads\.txt$', serve, {

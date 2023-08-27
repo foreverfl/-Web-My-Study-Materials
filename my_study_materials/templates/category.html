@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="d-flex justify-content-end mt-5 gap-2">
-  {% if user.is_authenticated %}
+  {% if category.user == user %}
   <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#classificationCreateModal">목차 추가</button>
   <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#classificationUpdateModal">목차 수정</button>
   <button type="button" class="btn btn-outline-danger" id="classificationDeleteBtn">목차 삭제</button>

@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block content %}
+<html>
+  <head>
+      <title>결제하기</title>
+      <meta charset="UTF-8" />
+      <script src="https://js.tosspayments.com/v1/payment"></script>
+  </head>
+  <body>
+    <script>
+      const successUrl = "{% url 'payment_success' %}";
+      const failUrl = "{% url 'payment_fail' %}";
+      var clientKey = '{{ client_key }}'
+      var uid = '{{ uid }}'
+      var tossPayments = TossPayments(clientKey)
+      console.log(tossPayments)
+
+      tossPayments.requestBillingAuth('카드', { //자동결제는 카드만 지원
+        // 결제 정보 파라미터
+        customerKey: uid,
+        successUrl: window.location.origin + successUrl,
+        failUrl: window.location.origin + failUrl,
+      })
+      .catch(function (error) {
+        if (error.code === 'USER_CANCEL') {
+          // 결제 고객이 결제창을 닫았을 때
+          window.location.href = window.location.origin + '/'; 
+        }
+      });
+    </script>
+  </body>
+</html>
+{% endblock %}

@@ -1,14 +1,37 @@
 @font-face {
-  font-family: "Kanit";
+  font-family: "Kanit"; /* 사용자 지정 이름 */
   src: url("../fonts/IndieFlower-Regular.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
 
+@font-face {
+  font-family: "Noto Sans KR", sans-serif; /* 사용자 지정 이름 */
+  src: url("../fonts/NotoSansKR-Light.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+body,
+h1,
+h2,
+h3,
+p {
+  font-family: "Noto Sans KR", sans-serif;
+}
+
 .navbar-brand {
   font-family: "Kanit", sans-serif;
   text-align: center;
-  font-size: 30px; /* 글자 크기 조절 */
+  font-size: 30px;
+}
+
+.sidebar-category :hover {
+  background-color: #f8f9fa;
+}
+
+#category-settings {
+  cursor: pointer;
 }
 
 .sidebar {

@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>회원 혜택</title>
+  <style>
+    td { 
+      padding: 15px 0; 
+    }
+
+    table {
+      width: 80%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="d-flex justify-content-center align-items-center" style="height: 80vh">
+    <div>
+      <h3 class="fw-bold text-center pb-3">회원 혜택</h3>
+      <table class="table table-hover text-center mx-auto">
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">무료회원</th>
+            <th scope="col">유료회원</th>
+          </tr>
+        </thead>
+        <tbody class="table-group-divider">
+          <tr>
+            <th scope="row">카테고리 개수</th>
+            <td>최대 1개</td>
+            <td>최대 10개</td>
+          </tr>
+          <tr>
+            <th scope="row">목록 개수</th>
+            <td>최대 5개</td>
+            <td>최대 10개</td>
+          </tr>
+          <tr>
+            <th scope="row">데이터 개수</th>
+            <td>최대 100개</td>
+            <td>최대 1,000개</td>
+          </tr>
+          <tr>
+            <th scope="row">비공개</th>
+            <td>불가능</td>
+            <td>가능</td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- 표 끝 -->
+
+      <!-- 추가 설명 -->
+      <div class="text-muted text-start small mt-3">
+        <p>- 카테고리 > 목록 > 데이터 순으로 구성됩니다.</p>
+        <p>- 저장 가능한 카테고리/목록/데이터 수는 변경될 수 있습니다.</p>
+        <p>- 유료회원을 위한 추가적인 혜택이 추후에 추가될 예정입니다.</p>
+      </div>
+
+      <!-- 구독하기 버튼 -->
+      <div class="d-flex justify-content-center mt-3">
+        <a href="{% url 'payment' %}" class="btn btn-primary">구독하기</a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
+{% endblock %}

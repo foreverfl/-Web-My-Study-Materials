@@ -1,14 +1,19 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
-from .models import Notice, Category, Classification, Data
+from .models import Subscription, Notice, Category, Classification, Data
 
 
-class NoticeForm(forms.ModelForm):  # Django의 ModelForm 클래스를 상속받는 CategoryForm 클래스를 선언
-    class Meta:  # form과 관련된 옵션들을 설정
+class SubscriptionForm(forms.ModelForm):
+    class Meta:
+        model = Subscription  # form이 처리할 model
+        fields = ['is_subscribed']  # form이 처리할 model의 필드
+
+
+class NoticeForm(forms.ModelForm):
+    class Meta:
         model = Notice  # form이 처리할 model
-        # form이 처리할 model의 필드를 리스트 형태로 지정
-        fields = ['user', 'title', 'content', 'date']
+        fields = ['user', 'title', 'content', 'date']  # form이 처리할 model의 필드
 
 
 class CategoryForm(forms.ModelForm):

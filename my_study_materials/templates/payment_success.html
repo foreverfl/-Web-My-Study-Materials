@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+<html lang="ko">
+  <head>
+    <title>구매하기</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>빌링결제 성공</title>
+  </head>
+      
+  <body>      
+    <section>
+        <h1>빌링결제 성공</h1>
+        <pre>{{ res }}</pre>
+        <br>
+    </section> 
+
+    <a class="btn btn-primary" href="{% url 'index' %}">돌아가기</a>
+      
+  </body>
+</html>
+{% endblock %}

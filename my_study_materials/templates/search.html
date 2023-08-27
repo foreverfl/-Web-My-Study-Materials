@@ -1,23 +1,60 @@
 {% extends "layout.html" %}
-{% load static %}
 
 {% block content %}
 <div class="container mt-5">
-    <h1>검색 결과</h1>
-    <hr style="border-width: 3px;">
     <div class="row">
         <div class="col-12">
-            {% if results %}
-                <ul class="list-group">
-                    {% for result in results %}
-                        <li class="list-group-item list-group-item-action">
-                            <a class="text-decoration-none"href="{% url 'data_detail' result.classification.category.id result.classification.id result.id %}">{{ result.name }}</a>
-                        </li>
+            <h1 class="mb-4">My Categories</h1>
+            {% for category in my_categories %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h2 class="m-0">{{ category.name }}</h2>
+                </div>
+                <div class="card-body">
+                    {% for classification in category.classifications %}
+                    <div class="mb-3">
+                        <h4 class="text-primary">{{ classification.name }}</h4>
+                        <ul class="list-group">
+                        {% for data in classification.datas %}
+                            <li class="list-group-item">
+                                <a class="text-decoration-none" href="{% url 'data_detail' category_id=data.category_id classification_id=data.classification_id data_id=data.id %}">
+                                    {{ data.name }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    </div>
                     {% endfor %}
-                </ul>
-            {% else %}
-                <p>이름에 해당하는 검색 결과가 없습니다.</p>
-            {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="col-12 mt-5">
+            <h1 class="mb-4">Added Categories</h1>
+            {% for category in added_categories %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h2 class="m-0">{{ category.name }}</h2>
+                </div>
+                <div class="card-body">
+                    {% for classification in category.classifications %}
+                    <div class="mb-3">
+                        <h4 class="text-primary">{{ classification.name }}</h4>
+                        <ul class="list-group">
+                        {% for data in classification.datas %}
+                            <li class="list-group-item">
+                                <a class="text-decoration-none" href="{% url 'data_detail' category_id=data.category_id classification_id=data.classification_id data_id=data.id %}">
+                                    {{ data.name }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </div>
 </div>

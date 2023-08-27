@@ -17,7 +17,7 @@
      crossorigin="anonymous"></script>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light pt-4">
+    <nav class="navbar navbar-expand-lg pt-4">
       <div class="container-fluid">
         <!-- Logo -->
         <a class="navbar-brand ps-5" href="/">My Study<br>Materials</a>
@@ -54,9 +54,13 @@
               </a>
               <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown"> <!-- dropdown 왼쪽 정렬 -->
                 {% if user.is_authenticated %}
-                  <a class="dropdown-item" href="{% url 'account_logout' %}">로그아웃</a>
+                  <p class="dropdown-item text-center disabled">{{user.last_name}} {{user.first_name}}님 환영합니다!</p>
+                  <p class="dropdown-item text-center disabled">무료회원</p>
+                  <a class="dropdown-item text-center disabled" href="{% url 'payment_describe' %}">구독하기</a>
+                  <hr>
+                  <a class="dropdown-item text-center" href="{% url 'account_logout' %}">로그아웃</a>
                 {% else %}
-                  <a class="dropdown-item" href="{% url 'account_login' %}">로그인</a>
+                  <a class="dropdown-item text-center" href="{% url 'account_login' %}">로그인</a>
                 {% endif %}
               </div>
           </div>
@@ -67,20 +71,28 @@
     <div class="container-fluid">
       <div class="row">
         <!-- Left sidebar -->
-        <div class="col-2 bg-light sidebar py-5">
+        <div class="col-2 sidebar py-5">
           <div class="sidebar-sticky">
             <ul class="nav flex-column gap-3">
               <!-- CRUD -->
               {% if user.is_authenticated %}
-                <li class="nav-item d-flex justify-content-center gap-3 pb-5">
-                  <a class="btn btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#categoryCreateModal">추가</a>
-                  <a class="btn btn-outline-secondary" href="#" data-bs-toggle="modal" data-bs-target="#categoryUpdateModal">수정</a>
-                  <a class="btn btn-outline-danger" href="#" id="deleteCategoryBtn">삭제</a>
+              <p id="category-settings" class="fw-bold d-flex justify-content-center" data-bs-toggle="collapse" data-bs-target="#categoryButtons">My Categories Settings
+                <img id="caret-icon" class="align-self-center ms-2" src="{% static 'bootstrap-icons-1.10.5/caret-down-fill.svg'%}" alt="caret-down-fill" width="10" height="10" />                   
+              </p>
+              <div class="collapse" id="categoryButtons">
+                <li class="nav-item rounded d-flex justify-content-center gap-3">                
+                  <a class="btn btn-sm btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#categoryCreateModal">추가</a>
+                  <a class="btn btn-sm btn-outline-secondary" href="#" data-bs-toggle="modal" data-bs-target="#categoryUpdateModal">수정</a>
+                  <a class="btn btn-sm btn-outline-danger" href="#" id="deleteCategoryBtn">삭제</a>
                 </li>
+              </div>
+              <hr>
               {% endif %}
+
               <!--User Category -->
+              <p class="fw-bold d-flex justify-content-center">My Categories</p>
               {% for category in current_user_categories %}
-              <li class="nav-item d-flex justify-content-center">
+              <li class="sidebar-category nav-item rounded d-flex justify-content-center">
                   <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
                   <button class="btn btn-sm btn-danger delete-category-button" data-category-id="{{ category.id }}" style="display: none;">삭제</button>
               </li>
@@ -89,8 +101,9 @@
               <hr>
 
               <!-- Admin Category -->
+              <p class="fw-bold d-flex justify-content-center">Added Categories</p>
               {% for category in admin_categories %}
-              <li class="nav-item d-flex justify-content-center">
+              <li class="sidebar-category nav-item rounded d-flex justify-content-center">
                   <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
               </li>
               {% endfor %}
@@ -99,13 +112,13 @@
         </div>
 
         <!-- Content will be inserted here -->
-        <div class="col-7">
+        <div class="col-8">
             {% block content %}{% endblock %}
         </div>
 
         <!-- Right sidebar -->
-        <div class="col-3 d-flex justify-content-center align-items-center position-fixed" style="height:80vh; right: 0;">
-            <img src="{% static 'images/300x600.png' %}" alt="ad">
+        <div class="col-2 d-flex justify-content-center align-items-center position-fixed" style="height:80vh; right: 0;">
+            <img src="http://via.placeholder.com/300x600" alt="ad">
         </div>
       </div>
     </div>
@@ -145,7 +158,7 @@
           <div class="modal-body">
             <form id="CategoryUpdateForm" method="post" action="{% url 'category_update' %}">
               {% csrf_token %}
-              {% for category in categories %}
+              {% for category in current_user_categories %}
               <div class="mb-3">
                 <!-- forloop.counter0: Django 템플릿 태그에서 사용되는 반복문의 카운터변수 -->
                 <input type="hidden" name="category_id_{{ forloop.counter0 }}" value="{{ category.id }}">
@@ -185,13 +198,16 @@
           },
         })
         .then(response => {
-          if (!response.ok) { // response.ok가 false일 때 (즉, HTTP 상태 코드가 200~299가 아닐 때)
+          if (!response.ok) {
             return response.json().then(json => {
-              // 오류 메시지를 받아 처리할 수 있습니다.
-              alert(json.errors || "카테고리를 추가하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
+              if (json.errors === "Maximum number of categories reached") {
+                alert("최대 카테고리 개수를 초과했습니다.");
+              } else {
+                alert(json.errors || "카테고리를 추가하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
+              }
               throw new Error(`HTTP error! status: ${response.status}`);
-            
-          }
+            });
+          } 
           return response.json();
         })
         .then(json => {
@@ -234,6 +250,20 @@
             location.reload();
           });
         });
+      });
+    });
+
+    // Category 모양 변경
+    document.addEventListener('DOMContentLoaded', function() {
+      var categoryButtons = document.getElementById('categoryButtons'); 
+      var caretIcon = document.getElementById('caret-icon');
+
+      categoryButtons.addEventListener('show.bs.collapse', function() {
+        caretIcon.src = "{% static 'bootstrap-icons-1.10.5/caret-up-fill.svg' %}";
+      });
+
+      categoryButtons.addEventListener('hide.bs.collapse', function() { 
+        caretIcon.src = "{% static 'bootstrap-icons-1.10.5/caret-down-fill.svg' %}";
       });
     });
     </script>

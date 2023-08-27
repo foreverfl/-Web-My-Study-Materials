@@ -4,3 +4,6 @@ access.log
 error.log
 myenv/
 dl.fedoraproject.org/
+
+
+my_study_materials/static/secrets.txt
