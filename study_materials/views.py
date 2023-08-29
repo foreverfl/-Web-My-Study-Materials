@@ -19,6 +19,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.core.exceptions import FieldError
 from markdownx.utils import markdownify
 import requests
 
@@ -98,17 +99,28 @@ def notice_delete(request, notice_id):  # Notice 삭제
 @login_required
 def category_create(request):
     user = request.user
-    subscription = Subscription.objects.get(user=user)
-    current_categories_count = Category.objects.filter(user=user).count()
-    if subscription.is_subscribed:
-        max_categories = 10
+
+    if user.is_superuser:
+        max_categories = float('inf')  # 무제한
     else:
-        max_categories = 1
+        subscription = Subscription.objects.get(user=user)
+        if subscription.is_subscribed:
+            max_categories = 10
+        else:
+            max_categories = 1
+
+    current_categories_count = Category.objects.filter(user=user).count()
 
     if current_categories_count >= max_categories:
         return JsonResponse({"status": "error", "errors": "Maximum number of categories reached"}, status=400)
 
     form = CategoryForm(request.POST)
+    category_name = request.POST.get('name')
+
+    # 같은 이름의 카테고리가 있는지 검사
+    if Category.objects.filter(user=user, name=category_name).exists():
+        return JsonResponse({"status": "error", "errors": "Category name already exists"}, status=400)
+
     form.user = request.user
     if form.is_valid():  # user 필드가 필수가 아니므로 이 시점에서 유효성 검사 가능
         category = form.save(commit=False)
@@ -176,7 +188,24 @@ def classification_detail(request, category_id, classification_id):
     category = get_object_or_404(Category, pk=category_id)
     classification = get_object_or_404(Classification, pk=classification_id)
     # Data 모델에서 classification 필드의 값이 변수 classification과 일치하는 객체들을 필터링하여 가져옴
-    data_list = Data.objects.filter(classification=classification)
+    data_list = Data.objects.filter(
+        classification=classification).order_by('name')
+
+    sort_by = request.GET.get('sortBy', 'name')  # default is 'name'
+    order = request.GET.get('order', 'asc')  # default is 'asc'
+
+    try:
+        if sort_by in ['name', 'frequency']:
+            if order == 'desc':
+                sort_by = '-' + sort_by
+            data_list = data_list.order_by(sort_by)
+    except FieldError:
+        pass  # 잘못된 필드일 경우 기본 상태로 유지
+
+    if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+        data_list = list(data_list.values('id', 'name'))
+        return JsonResponse({'data_list': data_list})
+
     context = {
         'category': category,
         'category_id': category_id,
