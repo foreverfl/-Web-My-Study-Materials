@@ -30,8 +30,15 @@ p {
   background-color: #f8f9fa;
 }
 
-#category-settings {
+#category-settings,
+#classification-settings,
+#sortDataByName,
+#sortDataByFrequency {
   cursor: pointer;
+}
+
+.sort-bold {
+  font-weight: bold;
 }
 
 .sidebar {

@@ -2,11 +2,20 @@
 {% load static %}
 
 {% block content %}
-<div class="d-flex justify-content-end mt-5 gap-2">
+<div class="mt-5 gap-2 d-flex flex-column align-items-end">
   {% if category.user == user %}
-  <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#classificationCreateModal">목차 추가</button>
-  <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#classificationUpdateModal">목차 수정</button>
-  <button type="button" class="btn btn-outline-danger" id="classificationDeleteBtn">목차 삭제</button>
+    <p id="classification-settings" class="fw-bold" data-bs-toggle="collapse" data-bs-target="#classificationButtons">My Classification Settings
+      <img id="classification-caret-icon" class="align-self-center ms-2" src="{% static 'bootstrap-icons-1.10.5/caret-down-fill.svg'%}" alt="caret-down-fill" width="10" height="10" />                   
+    </p>
+    <div class="collapse" id="classificationButtons">
+      <ul class="list-unstyled">
+        <li class="nav-item rounded gap-3">                
+          <a type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#classificationCreateModal">추가</a>
+          <a type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#classificationUpdateModal">수정</a>
+          <a type="button" class="btn btn-sm btn-outline-danger" id="classificationDeleteBtn">삭제</a>
+        </li>
+      </ul>
+    </div>
   {% endif %}
 </div>
 
@@ -141,5 +150,19 @@
       alert('삭제 중 오류가 발생했습니다.');
     });
   }
+
+  // classification 모양 변경
+  document.addEventListener('DOMContentLoaded', function() {
+    const classificationButtons = document.getElementById('classificationButtons'); 
+    const classificationCaretIcon = document.getElementById('classification-caret-icon');
+
+    classificationButtons.addEventListener('show.bs.collapse', function() {
+      classificationCaretIcon.src = "{% static 'bootstrap-icons-1.10.5/caret-up-fill.svg' %}";
+    });
+
+    classificationButtons.addEventListener('hide.bs.collapse', function() { 
+      classificationCaretIcon.src = "{% static 'bootstrap-icons-1.10.5/caret-down-fill.svg' %}";
+    });
+  });
 </script>
 {% endblock %}

@@ -8,9 +8,9 @@
   <div class="d-flex justify-content-end mt-5 gap-2">
       {% if category.user == user %}
       <a href="{% url 'data_update_form' category_id=category_id classification_id=classification_id data_id=data_id %}">
-          <button type="button" class="btn btn-outline-secondary">데이터 수정</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary">데이터 수정</button>
       </a>      
-      <button type="submit" class="btn btn-outline-danger">데이터 삭제</button>
+      <button type="submit" class="btn btn-sm btn-outline-danger">데이터 삭제</button>
       {% endif %}
   </div>
 </form>
@@ -28,7 +28,6 @@
   <p class="fs-3">{{ stars }}</p>
   {% if name %}<p class="fs-3"><strong>{{ name }}</strong></p><hr>{% endif %}
   {% if description %}
-    <p class="fs-3"><strong>설명</strong></p>
     {{ description|safe }}
   {% endif %}
 </div>

@@ -77,7 +77,7 @@
               <!-- CRUD -->
               {% if user.is_authenticated %}
               <p id="category-settings" class="fw-bold d-flex justify-content-center" data-bs-toggle="collapse" data-bs-target="#categoryButtons">My Categories Settings
-                <img id="caret-icon" class="align-self-center ms-2" src="{% static 'bootstrap-icons-1.10.5/caret-down-fill.svg'%}" alt="caret-down-fill" width="10" height="10" />                   
+                <img id="category-caret-icon" class="align-self-center ms-2" src="{% static 'bootstrap-icons-1.10.5/caret-down-fill.svg'%}" alt="caret-down-fill" width="10" height="10" />                   
               </p>
               <div class="collapse" id="categoryButtons">
                 <li class="nav-item rounded d-flex justify-content-center gap-3">                
@@ -118,7 +118,7 @@
 
         <!-- Right sidebar -->
         <div class="col-2 d-flex justify-content-center align-items-center position-fixed" style="height:80vh; right: 0;">
-            <img src="http://via.placeholder.com/300x600" alt="ad">
+            <img src="https://via.placeholder.com/300x600" alt="ad">
         </div>
       </div>
     </div>
@@ -202,6 +202,8 @@
             return response.json().then(json => {
               if (json.errors === "Maximum number of categories reached") {
                 alert("최대 카테고리 개수를 초과했습니다.");
+              } else if (json.errors === "Category name already exists") {
+                alert("이미 존재하는 카테고리 이름입니다.");
               } else {
                 alert(json.errors || "카테고리를 추가하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
               }
@@ -255,15 +257,15 @@
 
     // Category 모양 변경
     document.addEventListener('DOMContentLoaded', function() {
-      var categoryButtons = document.getElementById('categoryButtons'); 
-      var caretIcon = document.getElementById('caret-icon');
+      const categoryButtons = document.getElementById('categoryButtons'); 
+      const categoryCaretIcon = document.getElementById('category-caret-icon');
 
       categoryButtons.addEventListener('show.bs.collapse', function() {
-        caretIcon.src = "{% static 'bootstrap-icons-1.10.5/caret-up-fill.svg' %}";
+        categoryCaretIcon.src = "{% static 'bootstrap-icons-1.10.5/caret-up-fill.svg' %}";
       });
 
       categoryButtons.addEventListener('hide.bs.collapse', function() { 
-        caretIcon.src = "{% static 'bootstrap-icons-1.10.5/caret-down-fill.svg' %}";
+        categoryCaretIcon.src = "{% static 'bootstrap-icons-1.10.5/caret-down-fill.svg' %}";
       });
     });
     </script>
