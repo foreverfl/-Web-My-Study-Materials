@@ -87,6 +87,6 @@ urlpatterns = [
 
     # robots.txt
     path('robots.txt', serve, {'path': 'robots.txt',
-         'document_root': settings.STATIC_ROOT}),
+         'document_root': settings.STATICFILES_DIRS[0]}),
 
 ]
