@@ -40,6 +40,7 @@ class Notice(models.Model):  # Notice 테이블
 class Category(models.Model):  # Category 테이블
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
+    is_public = models.BooleanField(default=True)
 
 
 class CategorySubscription(models.Model):  # 구독 정보를 담을 새로운 모델
@@ -65,6 +66,6 @@ class Data(models.Model):  # Data 테이블
     frequency = models.IntegerField()
 
     def save(self, *args, **kwargs):
-        if self.frequency > 5:
-            self.frequency = 5
+        if self.frequency > 10:
+            self.frequency = 10
         super(Data, self).save(*args, **kwargs)

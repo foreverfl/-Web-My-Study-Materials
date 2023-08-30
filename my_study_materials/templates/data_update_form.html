@@ -5,10 +5,10 @@
 <div class="container m-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-        <form action="{% url 'data_update' category_id=category_id classification_id=classification_id data_id=data.id %}" method="post" class="mt-5">
+        <form id="data_update_form" method="post" class="mt-5">
             {% csrf_token %}
             <div class="row">
-                <div class="col-md-3"> <!-- 이 부분은 열의 크기를 조절하므로 필요에 따라 변경할 수 있습니다. -->
+                <div class="col-md-3">
                     <div class="mb-3">
                         <label for="frequency" class="form-label">빈도</label>
                         <div class="input-group">
@@ -43,7 +43,7 @@
         var currentFrequency = parseInt(frequencyInput.value, 10);
         var newFrequency = currentFrequency + value; // 새로운 빈도 계산
         // 빈도가 1 이상 5 이하인지 확인
-        if (newFrequency >= 1 && newFrequency <= 5) {
+        if (newFrequency >= 1 && newFrequency <= 10) {
             frequencyInput.value = newFrequency;
         }
     }
@@ -56,6 +56,41 @@
     // 증가 버튼에 클릭 이벤트 리스너 추가
     document.getElementById('increaseFrequency').addEventListener('click', function() {
         changeFrequency(1);
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('data_update_form');  // 실제 form의 id로 교체해주세요.
+
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+            const url = "{% url 'data_update' category_id=category_id classification_id=classification_id data_id=data.id %}";
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                });
+                console.log(response.status);  // 상태 코드 로깅
+
+                if (response.status >= 400 && response.status < 500) {
+                    const json = await response.json();
+                    if (json.errors === "Data name already exists") {
+                        alert("이미 존재하는 데이터 이름입니다.");
+                    } else {
+                        alert(json.errors || "데이터를 업데이트하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
+                    }
+                } else {
+                    window.location.href = "{% url 'data_detail' category_id=category_id classification_id=classification_id data_id=data.id %}";  // 리다이렉트
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+            }
+        });
     });
 </script>
 {% endblock %}

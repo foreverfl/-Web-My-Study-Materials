@@ -5,7 +5,7 @@
 <div class="container m-5">
   <div class="row justify-content-center">
     <div class="col-md-8">
-      <form action="{% url 'data_create' category_id=category_id classification_id=classification_id %}" method="post" class="mt-5">
+      <form id="dataForm" class="mt-5">
         {% csrf_token %}
         <div class="mb-3">
           <label for="name" class="form-label">제목</label>
@@ -14,12 +14,55 @@
           <label for="description" class="form-label">내용</label>          
           <textarea type="text" class="form-control" id="description" name="description" rows="30"></textarea>
         </div>
-        <div class="text-center"> <!-- 추가 버튼을 가운데로 정렬 -->
-          <button type="submit" class="btn btn-primary btn-lg">추가하기</button> <!-- btn-lg 클래스로 크기를 키움 -->
+        <div class="text-center">
+          <button type="submit" class="btn btn-primary btn-lg">추가하기</button> 
         </div>
       </form>
     </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('dataForm');
+
+      form.addEventListener('submit', async function(event) {
+          event.preventDefault();
+
+          const formData = new FormData(form);
+          const url = "{% url 'data_create' category_id=category_id classification_id=classification_id %}";
+
+          try {
+              const response = await fetch(url, {
+                  method: 'POST',
+                  body: formData,
+                  headers: {
+                      'X-CSRFToken': '{{ csrf_token }}'
+                  }
+              });
+
+            const json = await response.json();  // 응답을 JSON으로 파싱
+
+            if (response.status >= 400 && response.status < 500) {
+                if (json.errors === "Maximum number of data reached") {
+                    alert("최대 데이터 개수를 초과했습니다.");
+                } else if(json.errors === "Data name already exists") {
+                    alert("이미 존재하는 데이터 이름입니다.");
+                } else {
+                    alert(json.errors || "데이터를 추가하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
+                }
+                return;
+            }
+
+            if (json.status === "success") {
+                window.location.href = json.redirect_url;  // 리다이렉트 URL로 이동
+            }
+
+          } catch (error) {
+              console.error("Fetch error:", error);
+          }
+      });
+  });
+</script>
 {% endblock %}
 

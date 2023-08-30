@@ -221,6 +221,41 @@
       });
     });
 
+    // 카테고리 수정
+    document.addEventListener("DOMContentLoaded", function(){
+      const categoryUpdateForm = document.querySelector("#CategoryUpdateForm");
+
+      categoryUpdateForm.addEventListener("submit", async function(event){
+        event.preventDefault();
+
+        const formData = new FormData(this);
+
+        try {
+          const response = await fetch("{% url 'category_update' %}", {
+            method: "POST",
+            headers: {
+              'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: formData
+          });
+          
+          if (response.status >= 400 && response.status < 500) {
+            const json = await response.json();
+            if (json.errors === "Category name already exists") {
+              alert("이미 존재하는 카테고리 이름입니다.");
+            } else {
+              alert(json.errors || "카테고리를 추가하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
+            }
+            return;
+          } 
+
+          location.reload();
+
+        } catch (error) {
+          alert("서버와의 통신에 실패했습니다.");
+        }
+      });
+    });
 
     // 카테고리 제거
     document.addEventListener('DOMContentLoaded', function() {

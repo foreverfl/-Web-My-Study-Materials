@@ -98,6 +98,7 @@ def notice_delete(request, notice_id):  # Notice 삭제
 @require_POST
 @login_required
 def category_create(request):
+    # 결제 여부에 따라 카테고리 개수 제한
     user = request.user
 
     if user.is_superuser:
@@ -117,12 +118,12 @@ def category_create(request):
     form = CategoryForm(request.POST)
     category_name = request.POST.get('name')
 
-    # 같은 이름의 카테고리가 있는지 검사
+    # 같은 이름의 카테고리 생성 제한
     if Category.objects.filter(user=user, name=category_name).exists():
         return JsonResponse({"status": "error", "errors": "Category name already exists"}, status=400)
 
     form.user = request.user
-    if form.is_valid():  # user 필드가 필수가 아니므로 이 시점에서 유효성 검사 가능
+    if form.is_valid():
         category = form.save(commit=False)
         category.user = request.user  # user 필드에 현재 로그인된 사용자 할당
         category.save()
@@ -146,10 +147,18 @@ def category_detail(request, category_id):
 
 @require_POST
 def category_update(request):
+
+    user = request.user
+
     for index in range(len(request.POST)//2):
         category_id = request.POST.get(f'category_id_{index}')
         category_name = request.POST.get(f'category_name_{index}')
+
         category = get_object_or_404(Category, id=category_id)
+        # 같은 이름의 카테고리 생성 제한
+        if Category.objects.filter(user=user, name=category_name).exclude(id=category_id).exists():
+            return JsonResponse({"status": "error", "errors": "Category name already exists"}, status=400)
+
         category.name = category_name
         category.save()
 
@@ -169,9 +178,30 @@ def category_delete(request, category_id):
 # Classification
 @require_POST
 def classification_create(request, category_id):
+    user = request.user  # 로그인된 사용자 정보 가져오기
+    category = get_object_or_404(Category, pk=category_id)
+
+    # 결제 여부에 따라 classification 개수 제한
+    if user.is_superuser:
+        max_classifications = float('inf')  # 무제한
+    else:
+        subscription = Subscription.objects.get(user=user)
+        if subscription.is_subscribed:
+            max_classifications = 10  # 10
+        else:
+            max_classifications = 5  # 5
+
+    current_classification_count = Classification.objects.filter(
+        category__user=user).count()
+    if current_classification_count >= max_classifications:
+        return JsonResponse({"status": "error", "message": "Maximum number of classifications reached"}, status=400)
+
+    # 같은 이름의 classification이 이미 존재하는지 확인
+    name = request.POST.get('name')
+    if Classification.objects.filter(category=category, name=name).exists():
+        return JsonResponse({"status": "error", "message": "Classification name already exists"}, status=400)
+
     try:
-        name = request.POST.get('name')
-        category = get_object_or_404(Category, pk=category_id)
         classification = Classification.objects.create(
             category=category, name=name)
         return JsonResponse({"status": "success"}, status=201)
@@ -218,14 +248,21 @@ def classification_detail(request, category_id, classification_id):
 
 @require_POST
 def classification_update(request, category_id):
+    user = request.user
+
     for index in range(len(request.POST)//2):
         classification_id = request.POST.get(f'classification_id_{index}')
         classification_name = request.POST.get(f'classification_name_{index}')
+
+        # 같은 이름의 classification이 이미 존재하는지 확인
+        if Classification.objects.filter(category__user=user, name=classification_name).exclude(id=classification_id).exists():
+            return JsonResponse({"status": "error", "errors": "Classification name already exists"}, status=400)
         classification = get_object_or_404(
             Classification, id=classification_id)
         classification.name = classification_name
         classification.save()
 
+    # HTTP_REFERER: 현재 요청이 발생한 웹페이지
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse('index')))
 
 
@@ -249,11 +286,35 @@ def data_create_form(request, category_id, classification_id):
 
 
 @require_POST
+@login_required  # 로그인된 사용자만이 데이터를 생성할 수 있도록 함
 def data_create(request, category_id, classification_id):
+    user = request.user
+
+    # 결제 여부에 따라 데이터 개수 제한
+    if user.is_superuser:
+        max_data = float('inf')  # 무제한
+    else:
+        subscription = Subscription.objects.get(user=user)
+        if subscription.is_subscribed:
+            max_data = 1000  # 1000
+        else:
+            max_data = 100   # 100
+
+    current_data_count = Data.objects.filter(
+        classification__category__user=user).count()
+
+    if current_data_count >= max_data:
+        return JsonResponse({"status": "error", "errors": "Maximum number of data reached"}, status=400)
+
+    # 같은 이름의 데이터 생성 제한
+    data_name = request.POST.get('name')
+    if Data.objects.filter(classification__category__user=user, name=data_name).exists():
+        return JsonResponse({"status": "error", "errors": "Data name already exists"}, status=400)
+
     # 폼에서 전송된 데이터 가져오기
     name = request.POST['name']
     description = request.POST['description']
-    frequency = 1  # frequency는 1로 설정하거나 다른 방식으로 처리할 수 있습니다.
+    frequency = 1
 
     # Data 객체 생성 및 저장
     data = Data(
@@ -264,8 +325,14 @@ def data_create(request, category_id, classification_id):
     )
     data.save()
 
+    redirect_url = reverse('data_detail', kwargs={
+        'category_id': category_id,
+        'classification_id': classification_id,
+        'data_id': data.id
+    })
+
     # 저장 후 해당 데이터의 세부 페이지로 리다이렉션
-    return redirect('data_detail', category_id=category_id, classification_id=classification_id, data_id=data.id)
+    return JsonResponse({"status": "success", "redirect_url": redirect_url}, status=201)
 
 
 def data_detail(request, category_id, classification_id, data_id):
@@ -273,7 +340,15 @@ def data_detail(request, category_id, classification_id, data_id):
     classification = get_object_or_404(
         Classification, pk=classification_id)  # classification 쿼리
     data = get_object_or_404(Data, pk=data_id)
-    stars = '☆' * data.frequency
+
+    # 별 개수 조정하기
+    frequency = data.frequency
+
+    if 1 <= frequency <= 5:
+        stars = '☆' * frequency
+    elif 6 <= frequency <= 10:
+        stars = '★' * (frequency - 5)
+
     # markdownify 함수를 사용하여 Markdown 형식으로 변환
     description = markdownify(data.description)
     context = {
@@ -304,8 +379,15 @@ def data_update_form(request, category_id, classification_id, data_id):
 
 @require_POST
 def data_update(request, category_id, classification_id, data_id):
+    user = request.user
     data = get_object_or_404(Data, pk=data_id)
-    data.name = request.POST.get('name')
+    name = request.POST.get('name')
+
+    # 같은 이름의 데이터가 이미 존재하는지 확인
+    if Data.objects.filter(classification__category__user=user, name=name).exclude(id=data_id).exists():
+        return JsonResponse({"status": "error", "errors": "Data name already exists"}, status=400)
+
+    data.name = name
     data.description = request.POST.get('description')
     data.frequency = int(request.POST.get('frequency'))
     data.save()

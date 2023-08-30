@@ -65,7 +65,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <form id="classificationUpdateForm" method="post" action="{% url 'classification_update' category_id=category.id %}">
+            <form id="classification_update_form" method="post" action="{% url 'classification_update' category_id=category.id %}">
               {% csrf_token %}
                {% for classification in classifications %}
               <div class="mb-3">
@@ -78,17 +78,17 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-            <button type="submit" class="btn btn-primary" form="classificationUpdateForm">저장</button>
+            <button type="submit" class="btn btn-primary" form="classification_update_form">저장</button>
           </div>
         </div>
       </div>
     </div> 
   
 <script>
-  // 저장
+  // 목차 저장
   document.querySelector('#saveClassificationBtn').addEventListener('click', function() {
-    var classificationName = document.querySelector('#classification-name').value;
-    var data = new URLSearchParams();
+    const classificationName = document.querySelector('#classification-name').value;
+    const data = new URLSearchParams();
     data.append('name', classificationName);
     fetch("{% url 'classification_create' category_id=category.id %}", {
       method: 'POST',
@@ -100,13 +100,53 @@
     }).then(function(response) {
       if (response.ok) {
         location.reload();
-      } else {
-        alert('Error: ' + response.statusText);
-      }
+        return;
+      } 
+      return response.json().then(json => {
+        if (json.message === "Maximum number of classifications reached") {
+          alert("최대 목차 개수를 초과했습니다.");
+        } else if (json.message === "Classification name already exists") {
+          alert("이미 존재하는 목차 이름입니다.");
+        } else {
+          alert(json.message || "목차를 추가하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      });      
     });
   });
 
-  // 삭제
+  // 목차 수정
+  document.querySelector('#classification_update_form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(document.querySelector('#classification_update_form'));
+
+    fetch("{% url 'classification_update' category_id=category.id %}", {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}'
+      }
+    })
+    .then(response => {
+      if (response.ok) {
+        location.reload(); 
+      } else {
+        return response.json().then(json => { // 실패 시 오류 메시지 출력
+          if (json.errors === "Classification name already exists") {
+            alert("이미 존재하는 목차 이름입니다.");
+          } else {
+            alert(json.errors || "목차를 수정하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
+          }
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Fetch Error:', error);
+    });
+  });
+
+  // 목차 삭제
   document.getElementById('classificationDeleteBtn').addEventListener('click', function() {
     var classificationList = document.getElementById('classificationList').querySelectorAll('li');
     for (var i = 0; i < classificationList.length; i++) {
