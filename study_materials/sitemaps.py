@@ -4,6 +4,8 @@ from .models import Data
 
 
 class StudyMaterialsSitemap(Sitemap):
+    protocol = 'https'
+
     def items(self):
         return Data.objects.all()
 
