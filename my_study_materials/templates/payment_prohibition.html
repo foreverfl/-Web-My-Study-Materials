@@ -1,0 +1,42 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이미 구독 중</title>
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+    <link
+      rel="stylesheet"
+      href="{% static 'bootstrap-5.3.1-dist/css/bootstrap.min.css' %}"
+    />
+</head>
+
+<body>
+
+    <div class="container vh-100 d-flex justify-content-center align-items-center">
+        <div class="row w-100 d-flex flex-column justify-content-center align-items-center">
+            <!-- 이미지 중앙 정렬 부분 -->
+            <div class="col-md-8 d-flex justify-content-center align-items-center pb-3">
+                <img class="rounded" src="{% static 'images/kisara.jpg' %}" alt="kisara" style="width: 100%">
+            </div>
+
+            <!-- 텍스트 중앙 정렬 부분 -->
+            <div class="col-md-8 text-center">
+                <div class="alert alert-warning" role="alert">
+                    <h4 class="alert-heading">이미 구독 중입니다!</h4>
+                    <p style="margin-bottom: 0;">이미 구독을 완료한 상태입니다.</p>
+                </div>
+                <a href="/" class="btn btn-primary">홈페이지로 돌아가기</a>
+            </div>           
+  
+        </div>
+    </div>
+    <!-- Bootstrap JS (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

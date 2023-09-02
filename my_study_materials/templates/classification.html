@@ -28,20 +28,20 @@
   </div>
   <hr>
   <ul class="list-group" id="classificationList">
-    {% for data in data_list %}
-      <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-        <a class="text-decoration-none" href="{% url 'data_detail' category_id=category_id classification_id=classification.id data_id=data.id %}">{{ data.name }}</a>
-      </li>
-    {% empty %}
-      <li class="list-group-item text-muted">현재 내용이 존재하지 않습니다.</li>
-    {% endfor %}
+  {% for data in first_page_data %}
+    <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+      <a class="text-decoration-none" href="/category/{{category_id}}/classification/{{classification_id}}/data/{{data.id}}/">{{data.name}}</a>
+    </li>
+  {% endfor %}  
   </ul>
 </div>
 <script>
-  // 데이터 정렬하기
+  // 데이터 정렬 및 페이지네이션(무한스크롤)
   document.addEventListener('DOMContentLoaded', function() {
       let isNameAsc = true;
       let isFrequencyAsc = true;
+      let currentPage = 2; // 현재 페이지
+      let isLastPage = false;
 
       // fw-bold 클래스 추가/삭제 함수
       function toggleBold(elementId) {
@@ -50,9 +50,9 @@
       }
 
       // 데이터를 불러와서 화면을 갱신하는 함수
-      function fetchData(sortBy, order) {
+      function fetchData(page, sortBy, order) {
         // Django 뷰에 요청
-        fetch(`/category/{{category_id}}/classification/{{classification_id}}/?sortBy=${sortBy}&order=${order}`, {
+        fetch(`/category/{{category_id}}/classification/{{classification_id}}/?page=${page}&sortBy=${sortBy}&order=${order}`, {
           headers: {
               'X-Requested-With': 'XMLHttpRequest'
           }
@@ -63,19 +63,37 @@
           data.data_list.forEach(item => {
            listHtml += `<li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"><a class="text-decoration-none" href="/category/{{category_id}}/classification/{{classification_id}}/data/${item.id}/">${item.name}</a></li>`;
           });
-          document.getElementById('classificationList').innerHTML = listHtml;
+          document.getElementById('classificationList').innerHTML += listHtml;
+
+          isLastPage = data.is_last_page;
         });
       }
 
       const nameSortBtn = document.querySelector('#sortDataByName');
       const frequencySortBtn = document.querySelector('#sortDataByFrequency');
 
+      let currentSort = 'name';  // 현재 정렬 기준을 저장하는 변수
+      let currentOrder = 'asc';  // 현재 정렬 순서를 저장하는 변수
+
+      // 스크롤 이벤트 등록
+      window.addEventListener("scroll", function() {
+        if (!isLastPage && window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+          // 페이지 하단에 도달했을 때
+          currentPage++;
+          fetchData(currentPage, currentSort, currentOrder);
+        }
+      });
+
       // 각 정렬 버튼에 이벤트 리스너 부착
       nameSortBtn.addEventListener('click', function() {
         toggleBold('sortDataByName');
-        fetchData('name', isNameAsc ? 'desc' : 'asc');
+        document.getElementById('classificationList').innerHTML = ''; // 리스트 초기화
         isNameAsc = !isNameAsc; // 상태 토글
-
+        currentSort = 'name';
+        currentOrder = isNameAsc ? 'asc' : 'desc';
+        currentPage = 1;
+        fetchData(currentPage, currentSort, currentOrder);
+        
         // 이미지 변경
         let nameCaretIcon = document.querySelector('#sort-name-caret-icon');
         nameCaretIcon.src = isNameAsc ? "{% static 'bootstrap-icons-1.10.5/caret-up-fill.svg' %}" : "{% static 'bootstrap-icons-1.10.5/caret-down-fill.svg' %}";
@@ -83,8 +101,12 @@
 
       frequencySortBtn.addEventListener('click', function() {
         toggleBold('sortDataByFrequency');
-        fetchData('frequency', isFrequencyAsc ? 'desc' : 'asc');
+        document.getElementById('classificationList').innerHTML = ''; // 리스트 초기화
         isFrequencyAsc = !isFrequencyAsc; // 상태 토글
+        currentSort = 'frequency';
+        currentOrder = isNameAsc ? 'asc' : 'desc';
+        currentPage = 1;
+        fetchData(currentPage, currentSort, currentOrder);        
 
         // 이미지 변경
         let frequencyCaretIcon = document.querySelector('#sort-frequency-caret-icon');

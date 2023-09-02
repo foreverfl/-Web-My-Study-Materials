@@ -3,19 +3,30 @@
 
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>My Study Materials</title>
-    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
-    <link
-      rel="stylesheet"
-      href="{% static 'bootstrap-5.3.1-dist/css/bootstrap.min.css' %}"
-    />
-    <link rel="stylesheet" href="{% static 'css/style.css'%}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/pygments.css' %}">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4751026650729929"
-     crossorigin="anonymous"></script>
-  </head>
+  <title>My Study Materials</title>
+  <meta name="description" content="나만의 공부자료를 정리하고 공유하는 사이트">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+  <meta property="og:title" content="My Study Materials">
+  <meta property="og:description" content="나만의 공부자료를 정리하고 공유하는 사이트">
+  <meta property="og:image" content="{% static 'images/noun-study.png' %}">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="{{ request.build_absolute_uri }}">
+  <meta property="twitter:title" content="My Study Materials">
+  <meta property="twitter:description" content="나만의 공부자료를 정리하고 공유하는 사이트">
+  <meta property="twitter:image" content="{% static 'images/noun-study.png' %}">
+
+  <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+  <link rel="stylesheet" href="{% static 'bootstrap-5.3.1-dist/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/style.css'%}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/pygments.css' %}">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4751026650729929"
+    crossorigin="anonymous"></script>
   <body>
     <nav class="navbar navbar-expand-lg pt-4">
       <div class="container-fluid">
@@ -52,17 +63,28 @@
                <a class="nav-link" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   <img src="{% static 'bootstrap-icons-1.10.5/person-circle.svg'%}" alt="person" width="30" height="30" />
               </a>
-              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown"> <!-- dropdown 왼쪽 정렬 -->
-                {% if user.is_authenticated %}
-                  <p class="dropdown-item text-center disabled">{{user.last_name}} {{user.first_name}}님 환영합니다!</p>
-                  <p class="dropdown-item text-center disabled">무료회원</p>
-                  <a class="dropdown-item text-center disabled" href="{% url 'payment_describe' %}">구독하기</a>
-                  <hr>
-                  <a class="dropdown-item text-center" href="{% url 'account_logout' %}">로그아웃</a>
-                {% else %}
-                  <a class="dropdown-item text-center" href="{% url 'account_login' %}">로그인</a>
-                {% endif %}
-              </div>
+          <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+            {% if user.is_authenticated %}
+              <p class="dropdown-item text-center disabled">{{ user.last_name }} {{ user.first_name }}님 환영합니다!</p>
+              
+              {% if user.is_staff %}
+                <p class="dropdown-item text-center disabled">관리자</p>
+              {% elif subscription.is_subscribed %}
+                <p class="dropdown-item text-center disabled">유료회원</p>
+              {% else %}
+                <p class="dropdown-item text-center disabled">무료회원</p>
+              {% endif %}
+
+              {% if not subscription.is_subscribed %}
+                <a class="dropdown-item text-center" href="{% url 'payment_describe' %}">구독하기</a>
+                <hr>
+              {% endif %}
+              
+              <a class="dropdown-item text-center" href="{% url 'account_logout' %}">로그아웃</a>
+            {% else %}
+              <a class="dropdown-item text-center" href="{% url 'account_login' %}">로그인</a>
+            {% endif %}
+          </div>
           </div>
         </div>
       </div>

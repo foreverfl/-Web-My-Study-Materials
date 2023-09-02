@@ -70,6 +70,7 @@ urlpatterns = [
     path('search/', views.search, name='search'),
 
     # payment
+    path('payment/prohibition', views.payment_test, name='payment_prohibition'),
     path('payment/describe', views.payment_describe, name='payment_describe'),
     path('payment/', views.payment, name='payment'),
     path('payment/success/', views.payment_success, name='payment_success'),

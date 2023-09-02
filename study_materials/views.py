@@ -12,22 +12,23 @@ from allauth.socialaccount.models import SocialAccount
 from apscheduler.schedulers.background import BackgroundScheduler
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.contrib.sitemaps import views as sitemap_views
 from django.contrib.staticfiles import finders
+from django.core.exceptions import FieldError
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.core.exceptions import FieldError
-from django.contrib.sitemaps import views as sitemap_views
 from markdownx.utils import markdownify
 import requests
 
 # 애플리케이션 내부 모듈
-from .forms import NoticeForm, CategoryForm, ClassificationForm, DataForm
-from .models import Subscription, Notice, Category, Classification, Data
 from .context_processors import common_context
+from .forms import CategoryForm, ClassificationForm, DataForm, NoticeForm
+from .models import Category, Classification, Data, Notice, Subscription
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -222,27 +223,38 @@ def classification_detail(request, category_id, classification_id):
     data_list = Data.objects.filter(
         classification=classification).order_by('name')
 
-    sort_by = request.GET.get('sortBy', 'name')  # default is 'name'
-    order = request.GET.get('order', 'asc')  # default is 'asc'
+    sort_by = request.GET.get('sortBy', 'name')  # 기본값은 'name'
+    order = request.GET.get('order', 'asc')  # 기본값은 'asc'
 
+    # sort_by와 order에 담겨있는 정렬 기준으로 data_list 정렬
     try:
         if sort_by in ['name', 'frequency']:
             if order == 'desc':
                 sort_by = '-' + sort_by
             data_list = data_list.order_by(sort_by)
     except FieldError:
-        pass  # 잘못된 필드일 경우 기본 상태로 유지
+        pass
+
+    # 페이지네이션 기능
+    page = request.GET.get('page', 1)  # 기본값은 1
+    paginator = Paginator(data_list, 20)
+    current_page_data = paginator.get_page(page)
 
     if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
-        data_list = list(data_list.values('id', 'name'))
-        return JsonResponse({'data_list': data_list})
+        data_list = list(current_page_data.object_list.values('id', 'name'))
+        is_last_page = current_page_data.number == paginator.num_pages  # 마지막 페이지인지 확인
+        return JsonResponse({'data_list': data_list, "is_last_page": is_last_page})
+    else:
+        # 처음 페이지 로딩 시 1페이지의 데이터를 미리 가져옴
+        first_page_data = list(paginator.get_page(
+            1).object_list.values('id', 'name'))
 
     context = {
         'category': category,
         'category_id': category_id,
         'classification': classification,
         'classification_id': classification_id,
-        'data_list': data_list  # Data 객체 목록을 템플릿에 전달
+        'first_page_data': first_page_data,
     }
     return render(request, 'classification.html', context)
 
@@ -500,9 +512,28 @@ def read_secret():
     return client_key, secret_key
 
 
+def payment_test(request):
+    context = {
+
+    }
+    return render(request, 'payment_prohibition.html', context)
+
+
 def payment(request):
     client_key, secret_key = read_secret()
     social_account = SocialAccount.objects.get(user=request.user)
+
+    # 유료회원은 페이지 접근 금지시키기
+    subscription = None
+    if request.user.is_authenticated:
+        try:
+            subscription = Subscription.objects.get(user=request.user)
+        except Subscription.DoesNotExist:
+            subscription = None
+
+    # 유료회원이라면 특별한 경고 페이지 띄우기
+    if subscription and subscription.is_subscribed:
+        return render(request, 'payment_prohibition.html')
 
     context = {
         'client_key': client_key,
@@ -615,7 +646,7 @@ def check_subscriptions():
         }
 
         params_payment = {
-            "orderId": int(time.time()),
+            "orderId": f"{int(time.time())}_{user.id}",
             "amount": 300,
             "customerKey": social_account.uid,
             "orderName": "MyStudyMaterials 구독",
