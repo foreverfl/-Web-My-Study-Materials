@@ -10,6 +10,7 @@ import pytz
 # 서드파티 라이브러리
 from allauth.socialaccount.models import SocialAccount
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.sitemaps import views as sitemap_views
@@ -25,6 +26,7 @@ from django.views.decorators.http import require_POST
 from django.conf import settings
 from django.http import FileResponse
 from markdownx.utils import markdownify
+from dateutil.relativedelta import relativedelta
 import requests
 
 # 애플리케이션 내부 모듈
@@ -547,16 +549,17 @@ def payment(request):
 
 def payment_success(request):
     client_key, secret_key = read_secret()
+    # 1. 카드 등록 요청 결과 확인하기
     authKey = request.GET.get('authKey')
     customerKey = request.GET.get('customerKey')
 
-    # 빌링키 발급받기
+    # 2. 빌링키 발급받기
     url_billing_key = "https://api.tosspayments.com/v1/billing/authorizations/issue"
     userpass = secret_key + ':'
-    encoded_u = base64.b64encode(userpass.encode()).decode()
+    encoded_userpass = base64.b64encode(userpass.encode()).decode()
 
     headers = {
-        "Authorization": "Basic %s" % encoded_u,
+        "Authorization": "Basic %s" % encoded_userpass,
         "Content-Type": "application/json"
     }
 
@@ -571,19 +574,19 @@ def payment_success(request):
     pretty = json.dumps(resjson, indent=4, ensure_ascii=False)
     logger.info(f"Response JSON: {pretty}")
 
+    # 3. 빌링키로 자동결제 실행하기
     billingKey = resjson["billingKey"]
-    cardCompany = resjson["cardCompany"]
-    cardNumber = resjson["cardNumber"]
-
-    # 빌링키로 결제하기
+    user = request.user
+    social_account = SocialAccount.objects.get(user=user)
     url_payment = "https://api.tosspayments.com/v1/billing/"
     params_payment = {
-        "orderId": int(time.time()),
-        "amount": 300,
         "customerKey": customerKey,
+        "amount": 300,
+        "orderId": f"{social_account.uid}_{int(time.time())}",
         "orderName": "MyStudyMaterials 구독",
-        "customerName": "이름",
-        "customerEmail": "이메일"
+        "customerEmail": user.email,
+        "customerName": user.last_name,
+        "taxFreeAmount": 0
     }
 
     res = requests.post(url_payment + billingKey,
@@ -597,7 +600,6 @@ def payment_success(request):
             user=request.user)
         subscription.is_subscribed = True
         subscription.start_date = timezone.now()
-        subscription.end_date = timezone.now() + timedelta(days=30)  # 30일 뒤에 만료
         subscription.payment_status = 'completed'
         subscription.billing_key = billingKey  # 빌링키 저장
         subscription.save()
@@ -606,10 +608,13 @@ def payment_success(request):
         logging.info('failed to save')
 
     context = {
+        # 1. 카드 등록 요청 결과 확인하기
+        'authKey': authKey,
+        'customerKey': customerKey,
+        # 2. 빌링키 발급받기
+        'billingKey': billingKey,
+        # 3. 빌링키로 자동결제 실행하기
         "res": pretty,
-        "billingKey": billingKey,
-        "cardCompany": cardCompany,
-        "cardNumber": cardNumber,
     }
 
     return render(request, "payment_success.html", context)
@@ -631,7 +636,7 @@ def payment_fail(request):
 def check_subscriptions():
     client_key, secret_key = read_secret()
 
-    subscriptions = Subscription.objects.all()
+    subscriptions = Subscription.objects.exclude(billing_key__isnull=True)
     for subscription in subscriptions:
         user = subscription.user
         social_account = SocialAccount.objects.get(user=user)
@@ -648,12 +653,13 @@ def check_subscriptions():
         }
 
         params_payment = {
-            "orderId": f"{int(time.time())}_{user.id}",
-            "amount": 300,
             "customerKey": social_account.uid,
+            "amount": 300,
+            "orderId": f"{social_account.uid}_{int(time.time())}",
             "orderName": "MyStudyMaterials 구독",
-            "customerName": user.username,
             "customerEmail": user.email,
+            "customerName": user.last_name,
+            "taxFreeAmount": 0
         }
 
         res = requests.post(url_payment + billingKey,
@@ -663,7 +669,9 @@ def check_subscriptions():
         logging.info(pretty)
 
         if resjson.get('status') == 'DONE':
-            subscription.end_date = timezone.now() + timedelta(days=30)  # 30일 뒤로 만료일 갱신
+            # 월을 1개 더하여 구독 만료일을 갱신
+            # subscription.end_date = subscription.end_date + relativedelta(months=+1)
+            subscription.end_date = timezone.now() + timedelta(seconds=10)
             subscription.payment_status = 'completed'  # 결제 상태를 완료로 설정
             subscription.save()  # DB에 저장
 
@@ -675,5 +683,7 @@ def check_subscriptions():
 
 
 # scheduler = BackgroundScheduler()
-# scheduler.add_job(check_subscriptions, 'interval', minutes=1)  # 1분마다 실행
+# # trigger = CronTrigger(day_of_week='0-6', hour=0, minute=0)  # 매일 자정에 실행
+# # scheduler.add_job(check_subscriptions, trigger)
+# scheduler.add_job(check_subscriptions, 'interval', seconds=30)  # 1분마다 실행
 # scheduler.start()

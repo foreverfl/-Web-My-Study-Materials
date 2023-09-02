@@ -1,18 +1,24 @@
-from django.contrib.sitemaps.views import sitemap
-from .sitemaps import StudyMaterialsSitemap
-from django.urls import path, include
-from . import views
-from .views import my_sitemap
-from django.urls import re_path
-from django.views.static import serve
+# Django 내장 모듈
 from django.conf import settings
+from django.contrib import admin
+from django.contrib.sitemaps.views import sitemap
+from django.urls import path, include, re_path
+from django.views.static import serve
+
+# 파이썬 표준 라이브러리
 import os
+
+# 현재 앱의 모듈
+from . import views
+from .sitemaps import StudyMaterialsSitemap
+from .views import my_sitemap
 
 sitemaps = {
     'study_materials': StudyMaterialsSitemap,
 }
 
 urlpatterns = [
+    path('msmadmin/', admin.site.urls),
     path('', views.index_view, name='index'),
     # allauth 라이브러리에서 제공하는 모든 url 패턴을 포함
     path('accounts/', include('allauth.urls')),

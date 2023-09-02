@@ -60,31 +60,31 @@
         <!-- Profile -->
         <div class="navbar-nav ml-auto pe-3">
           <div class="nav-item dropdown">
-               <a class="nav-link" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <img src="{% static 'bootstrap-icons-1.10.5/person-circle.svg'%}" alt="person" width="30" height="30" />
-              </a>
-          <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-            {% if user.is_authenticated %}
-              <p class="dropdown-item text-center disabled">{{ user.last_name }} {{ user.first_name }}님 환영합니다!</p>
-              
-              {% if user.is_staff %}
-                <p class="dropdown-item text-center disabled">관리자</p>
-              {% elif subscription.is_subscribed %}
-                <p class="dropdown-item text-center disabled">유료회원</p>
-              {% else %}
-                <p class="dropdown-item text-center disabled">무료회원</p>
-              {% endif %}
+            <a class="nav-link" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <img src="{% static 'bootstrap-icons-1.10.5/person-circle.svg'%}" alt="person" width="30" height="30" />
+            </a>
+            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+              {% if user.is_authenticated %}
+                <p class="dropdown-item text-center disabled">{{ user.last_name }} {{ user.first_name }}님 환영합니다!</p>
+                
+                {% if user.is_staff %}
+                  <p class="dropdown-item text-center disabled">관리자</p>
+                {% elif subscription.is_subscribed %}
+                  <p class="dropdown-item text-center disabled">유료회원</p>
+                {% else %}
+                  <p class="dropdown-item text-center disabled">무료회원</p>
+                {% endif %}
 
-              {% if not subscription.is_subscribed %}
-                <a class="dropdown-item text-center" href="{% url 'payment_describe' %}">구독하기</a>
-                <hr>
+                {% if not subscription.is_subscribed %}
+                  <a class="dropdown-item text-center" href="{% url 'payment_describe' %}">구독하기</a>
+                  <hr>
+                {% endif %}
+                
+                <a class="dropdown-item text-center" href="{% url 'account_logout' %}">로그아웃</a>
+              {% else %}
+                <a class="dropdown-item text-center" href="{% url 'account_login' %}">로그인</a>
               {% endif %}
-              
-              <a class="dropdown-item text-center" href="{% url 'account_logout' %}">로그아웃</a>
-            {% else %}
-              <a class="dropdown-item text-center" href="{% url 'account_login' %}">로그인</a>
-            {% endif %}
-          </div>
+            </div>
           </div>
         </div>
       </div>
@@ -122,13 +122,18 @@
 
               <hr>
 
-              <!-- Admin Category -->
+              <!-- Added Categories (default: Admin Category)-->
               <p class="fw-bold d-flex justify-content-center">Added Categories</p>
               {% for category in admin_categories %}
               <li class="sidebar-category nav-item rounded d-flex justify-content-center">
                   <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
               </li>
               {% endfor %}
+
+              <hr>
+
+              <!-- All Categories -->
+              <p class="fw-bold d-flex justify-content-center">All Categories</p>
             </ul>
           </div>
         </div>

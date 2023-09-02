@@ -19,7 +19,7 @@ def common_context(request):
     context = {
         'current_user_categories': current_user_categories,
         'admin_categories': admin_categories,
-        'subcription': subscription,
+        'subscription': subscription,
     }
 
     return context
