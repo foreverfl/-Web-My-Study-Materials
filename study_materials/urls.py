@@ -76,14 +76,7 @@ urlpatterns = [
     path('payment/success/', views.payment_success, name='payment_success'),
     path('payment/fail/', views.payment_fail, name='payment_fail'),
 
-
-    # adsense
-    re_path(r'^ads\.txt$', serve, {
-        'path': 'ads.txt',
-        'document_root': os.path.join(settings.STATICFILES_DIRS[0]),
-    }),
-
-    # sitemap
+    # Sitemap
     path('sitemap.xml', my_sitemap, {'sitemaps': sitemaps},
          name='django.contrib.sitemaps.views.sitemap'),
 
@@ -91,4 +84,12 @@ urlpatterns = [
     path('robots.txt', serve, {'path': 'robots.txt',
          'document_root': settings.STATICFILES_DIRS[0]}),
 
+    # Adsense
+    re_path(r'^ads\.txt$', serve, {
+        'path': 'ads.txt',
+        'document_root': os.path.join(settings.STATICFILES_DIRS[0]),
+    }),
+
+    # Naver
+    path('naver3a7b0c9f306d7cf81119e203ee3be4bf.html', views.naver_verification),
 ]

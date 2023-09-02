@@ -22,6 +22,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.conf import settings
+from django.http import FileResponse
 from markdownx.utils import markdownify
 import requests
 
@@ -675,3 +677,11 @@ def check_subscriptions():
 # scheduler = BackgroundScheduler()
 # scheduler.add_job(check_subscriptions, 'interval', minutes=1)  # 1분마다 실행
 # scheduler.start()
+
+
+# Naver
+def naver_verification(request):
+    file_path = os.path.join(
+        settings.BASE_DIR, 'naver3a7b0c9f306d7cf81119e203ee3be4bf.html')
+    with open(file_path, 'rb') as f:
+        return FileResponse(f)
