@@ -20,6 +20,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.core.exceptions import FieldError
+from django.contrib.sitemaps import views as sitemap_views
 from markdownx.utils import markdownify
 import requests
 
@@ -458,6 +459,19 @@ def search(request):
             classification_data['datas'].append(data_detail)
 
     return render(request, 'search.html', context)
+
+
+# Sitemap Override
+
+
+def my_sitemap(request, **kwargs):
+    # 기존의 sitemap 뷰 함수를 호출
+    response = sitemap_views.sitemap(request, **kwargs)
+
+    # X-Robots-Tag 헤더를 원하는 값으로 설정
+    response['X-Robots-Tag'] = 'index'
+
+    return response
 
 # Payment
 
