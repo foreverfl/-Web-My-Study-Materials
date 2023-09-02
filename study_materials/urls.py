@@ -91,5 +91,8 @@ urlpatterns = [
     }),
 
     # Naver
-    path('naver3a7b0c9f306d7cf81119e203ee3be4bf.html', views.naver_verification),
+    path('naver3a7b0c9f306d7cf81119e203ee3be4bf.html', serve, {
+        'path': 'naver3a7b0c9f306d7cf81119e203ee3be4bf.html',
+        'document_root': settings.STATICFILES_DIRS[0]
+    }),
 ]
