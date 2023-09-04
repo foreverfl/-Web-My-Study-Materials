@@ -20,6 +20,6 @@ from . import views
 
 urlpatterns = [
     path('markdownx/', include('markdownx.urls')),
-    path('admin/', admin.site.urls),
+    path('msmadmin/', admin.site.urls),
     path('', include('study_materials.urls')),
 ]

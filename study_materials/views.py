@@ -24,7 +24,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.conf import settings
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponseNotFound
+from django.template import loader
 from markdownx.utils import markdownify
 from dateutil.relativedelta import relativedelta
 import requests
@@ -36,6 +37,15 @@ from .models import Category, Classification, Data, Notice, Subscription
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+def custom_404_view(request, exception):
+    user = request.user
+    if user.is_authenticated and user.is_superuser:
+        pass
+    else:
+        template = loader.get_template('404.html')
+        return HttpResponseNotFound(template.render())
 
 
 def index_view(request):

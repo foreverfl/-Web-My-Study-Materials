@@ -1,0 +1,20 @@
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>404 - Page Not Found</title>
+    <link rel="stylesheet" href="{% static 'bootstrap-5.3.1-dist/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+</head>
+<body>
+    <div class="container vh-100 d-flex justify-content-center align-items-center">
+        <div class="text-center">
+            <h1 class="display-1">404</h1>
+            <p class="lead">Page Not Found</p>
+            <p>페이지가 존재하지 않습니다.</p>
+            <a href="/" class="btn btn-primary">돌아가기</a>
+        </div>
+    </div>
+</body>
+</html>

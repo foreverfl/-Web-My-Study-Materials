@@ -17,8 +17,9 @@ sitemaps = {
     'study_materials': StudyMaterialsSitemap,
 }
 
+handler404 = 'study_materials.views.custom_404_view'
+
 urlpatterns = [
-    path('msmadmin/', admin.site.urls),
     path('', views.index_view, name='index'),
     # allauth 라이브러리에서 제공하는 모든 url 패턴을 포함
     path('accounts/', include('allauth.urls')),
