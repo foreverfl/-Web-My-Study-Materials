@@ -93,7 +93,7 @@
     <div class="container-fluid">
       <div class="row">
         <!-- Left sidebar -->
-        <div class="col-2 sidebar py-5">
+        <div class="col-xl-2 col-md-2 sidebar py-5">
           <div class="sidebar-sticky">
             <ul class="nav flex-column gap-3">
               <!-- CRUD -->
@@ -102,7 +102,7 @@
                 <img id="category-caret-icon" class="align-self-center ms-2" src="{% static 'bootstrap-icons-1.10.5/caret-down-fill.svg'%}" alt="caret-down-fill" width="10" height="10" />                   
               </p>
               <div class="collapse" id="categoryButtons">
-                <li class="nav-item rounded d-flex justify-content-center gap-3">                
+                <li class="nav-item rounded d-flex flex-xl-row flex-md-column justify-content-center gap-3">            
                   <a class="btn btn-sm btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#categoryCreateModal">추가</a>
                   <a class="btn btn-sm btn-outline-secondary" href="#" data-bs-toggle="modal" data-bs-target="#categoryUpdateModal">수정</a>
                   <a class="btn btn-sm btn-outline-danger" href="#" id="deleteCategoryBtn">삭제</a>
@@ -139,13 +139,19 @@
         </div>
 
         <!-- Content will be inserted here -->
-        <div class="col-8">
+        <div class="col-xl-8 col-md-10">
             {% block content %}{% endblock %}
         </div>
 
-        <!-- Right sidebar -->
-        <div class="col-2 d-flex justify-content-center align-items-center position-fixed" style="height:80vh; right: 0;">
-            <img src="https://via.placeholder.com/300x600" alt="ad">
+        <!-- Right sidebar (Desktop version) -->
+        <!-- d-xl-flex: xl 화면 크기에서만 flexbox 컨테이너로 만듦-->
+        <div class="d-none col-xl-2 d-xl-flex justify-content-center align-items-center position-fixed" style="height:80vh; right: 0;">
+          <img src="https://via.placeholder.com/160x600" alt="ad">
+        </div>
+
+        <!-- Right sidebar (Mobile and Tablet version) -->
+        <div class="d-none d-xl-none col-12 justify-content-center align-items-center">
+          <!-- 내용 없음 -->
         </div>
       </div>
     </div>
@@ -201,6 +207,18 @@
         </div>
       </div>
     </div> 
+
+    <!-- footer -->
+    <footer class="bg-light text-muted text-center">
+      <div class="container-fluid px-5 py-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+          <p class="mb-0" style="font-size: 12px;">
+            대표이사: JEON MYEONG KYU | 상호: My Dictionary | 사업자등록번호: 619-09-28407 | 이메일: forever_fl@naver.com 
+          </p>
+          <p class="mb-0" style="font-size: 12px;">Copyright © 2023 All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
   </body>
 
   <!-- Bootstrap JS and jQuery -->
