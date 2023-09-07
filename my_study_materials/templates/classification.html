@@ -37,7 +37,11 @@
 </div>
 <script>
   // 데이터 정렬 및 페이지네이션(무한스크롤)
+  let isFetching = false; // 현재 데이터를 불러오는 중인지 아닌지를 체크
+  
   document.addEventListener('DOMContentLoaded', function() {
+      fetchData(1, 'name', 'asc');
+
       let isNameAsc = true;
       let isFrequencyAsc = true;
       let currentPage = 1; // 현재 페이지
@@ -51,6 +55,7 @@
 
       // 데이터를 불러와서 화면을 갱신하는 함수
       function fetchData(page, sortBy, order) {
+        isFetching = true;
         // Django 뷰에 요청
         fetch(`/category/{{category_id}}/classification/{{classification_id}}/?page=${page}&sortBy=${sortBy}&order=${order}`, {
           headers: {
@@ -66,6 +71,7 @@
           document.getElementById('classificationList').innerHTML += listHtml;
 
           isLastPage = data.is_last_page;
+          isFetching = false;
         });
       }
 
@@ -77,8 +83,9 @@
 
       // 스크롤 이벤트 등록
       window.addEventListener("scroll", function() {
-        if (!isLastPage && window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+        if (!isLastPage && !isFetching && window.innerHeight + window.scrollY >= document.body.offsetHeight) {
           // 페이지 하단에 도달했을 때
+          isFetching = true;
           currentPage++;
           fetchData(currentPage, currentSort, currentOrder);
         }

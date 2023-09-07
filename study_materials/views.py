@@ -258,17 +258,12 @@ def classification_detail(request, category_id, classification_id):
         data_list = list(current_page_data.object_list.values('id', 'name'))
         is_last_page = current_page_data.number == paginator.num_pages  # 마지막 페이지인지 확인
         return JsonResponse({'data_list': data_list, "is_last_page": is_last_page})
-    else:
-        # 처음 페이지 로딩 시 1페이지의 데이터를 미리 가져옴
-        first_page_data = list(paginator.get_page(
-            1).object_list.values('id', 'name'))
 
     context = {
         'category': category,
         'category_id': category_id,
         'classification': classification,
         'classification_id': classification_id,
-        'first_page_data': first_page_data,
     }
     return render(request, 'classification.html', context)
 

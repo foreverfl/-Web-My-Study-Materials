@@ -42,24 +42,41 @@
         var frequencyInput = document.getElementById('frequency');
         var currentFrequency = parseInt(frequencyInput.value, 10);
         var newFrequency = currentFrequency + value; // 새로운 빈도 계산
-        // 빈도가 1 이상 5 이하인지 확인
         if (newFrequency >= 1 && newFrequency <= 10) {
             frequencyInput.value = newFrequency;
-        }
+        }        
     }
 
-    // 감소 버튼에 클릭 이벤트 리스너 추가
-    document.getElementById('decreaseFrequency').addEventListener('click', function() {
-        changeFrequency(-1);
-    });
-
-    // 증가 버튼에 클릭 이벤트 리스너 추가
-    document.getElementById('increaseFrequency').addEventListener('click', function() {
-        changeFrequency(1);
-    });
-
     document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('data_update_form');  // 실제 form의 id로 교체해주세요.
+        
+        // 처음 페이지에 로딩될 때의 빈도값을 저장
+        var initialFrequency = document.getElementById('frequency').value;
+
+        // 빈도값이 변경되었는지 확인 후 배경색을 변경하는 함수
+        function checkFrequency() {
+            var currentFrequency = document.getElementById('frequency').value;
+            if (currentFrequency === initialFrequency) {  // 처음 값과 현재 값이 같다면 배경 색깔 변경
+                document.getElementById('frequency').style.backgroundColor = '#ebeded';
+            } else { // 같지 않다면 배경색을 기본값으로 설정
+                document.getElementById('frequency').style.backgroundColor = '';
+            }
+        }
+
+        // 감소 버튼에 클릭 이벤트 리스너 추가
+        document.getElementById('decreaseFrequency').addEventListener('click', function() {
+            changeFrequency(-1);
+            checkFrequency();
+        });
+
+        // 증가 버튼에 클릭 이벤트 리스너 추가
+        document.getElementById('increaseFrequency').addEventListener('click', function() {
+            changeFrequency(1);
+            checkFrequency();
+        });
+
+        checkFrequency(); // 페이지 로딩시 초기 배경색 설정
+
+        const form = document.getElementById('data_update_form'); 
 
         form.addEventListener('submit', async function(event) {
             event.preventDefault();
