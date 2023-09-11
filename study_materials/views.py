@@ -114,9 +114,10 @@ def notice_delete(request, notice_id):  # Notice 삭제
 @require_POST
 @login_required
 def category_create(request):
-    # 결제 여부에 따라 카테고리 개수 제한
     user = request.user
+    subscription = Subscription.objects.filter(user=user).first()
 
+    # 결제 여부에 따라 카테고리 개수 제한
     if user.is_superuser:
         max_categories = float('inf')  # 무제한
     else:
@@ -133,6 +134,12 @@ def category_create(request):
 
     form = CategoryForm(request.POST)
     category_name = request.POST.get('name')
+    # 문자열로 넘어오기 때문에 boolean으로 변환
+    if subscription.is_subscribed:  # 유료 구독자인 경우에만 is_public 값을 받아옴
+        is_public = request.POST.get('is_public') == 'true'
+    else:
+        is_public = True  # 무료 구독자는 무조건 공개로 설정
+    description = request.POST.get('description')
 
     # 같은 이름의 카테고리 생성 제한
     if Category.objects.filter(user=user, name=category_name).exists():
@@ -142,17 +149,26 @@ def category_create(request):
     if form.is_valid():
         category = form.save(commit=False)
         category.user = request.user  # user 필드에 현재 로그인된 사용자 할당
+        category.is_public = is_public  # is_public 필드 설정
+        category.description = description  # description 필드 설정
         category.save()
         return JsonResponse({"status": "success"}, status=201)
     else:
         return JsonResponse({"status": "error", "errors": form.errors}, status=400)
 
 
+def category_list(request):
+    categories = Category.objects.filter(is_public=True)
+
+    return render(request, 'categories.html', {'categories': categories})
+
+
 def category_detail(request, category_id):
     logger.info('test')
     category = get_object_or_404(Category, pk=category_id)
     categories = Category.objects.all()
-    classifications = Classification.objects.filter(category=category)
+    classifications = Classification.objects.filter(
+        category=category).order_by('name')
     context = {
         'categories': categories,
         'category': category,
@@ -330,7 +346,7 @@ def data_create(request, category_id, classification_id):
 
     # 같은 이름의 데이터 생성 제한
     data_name = request.POST.get('name')
-    if Data.objects.filter(classification__category__user=user, name=data_name).exists():
+    if Data.objects.filter(classification_id=classification_id, name=data_name).exists():
         return JsonResponse({"status": "error", "errors": "Data name already exists"}, status=400)
 
     # 폼에서 전송된 데이터 가져오기
@@ -389,11 +405,16 @@ def data_detail(request, category_id, classification_id, data_id):
 
 def data_update_form(request, category_id, classification_id, data_id):
     data = get_object_or_404(Data, pk=data_id)
+    current_classification = get_object_or_404(
+        Classification, pk=classification_id)
+    classifications = Classification.objects.filter(
+        category=current_classification.category).order_by('name')
 
     context = {
         'data': data,
         'category_id': category_id,
         'classification_id': classification_id,
+        'classifications': classifications,
     }
 
     return render(request, 'data_update_form.html', context)
@@ -404,18 +425,21 @@ def data_update(request, category_id, classification_id, data_id):
     user = request.user
     data = get_object_or_404(Data, pk=data_id)
     name = request.POST.get('name')
+    classification_id = int(request.POST.get('classification'))
+    classification = get_object_or_404(Classification, pk=classification_id)
 
     # 같은 이름의 데이터가 이미 존재하는지 확인
-    if Data.objects.filter(classification__category__user=user, name=name).exclude(id=data_id).exists():
+    if Data.objects.filter(classification_id=classification_id, name=name).exclude(id=data_id).exists():
         return JsonResponse({"status": "error", "errors": "Data name already exists"}, status=400)
 
     data.name = name
     data.description = request.POST.get('description')
     data.frequency = int(request.POST.get('frequency'))
+    data.classification = classification
     data.save()
 
     # 저장 후 상세 페이지로 리다이렉션
-    return redirect('data_detail', category_id=category_id, classification_id=classification_id, data_id=data_id)
+    return redirect('data_detail', category_id=category_id, classification_id=classification.id, data_id=data_id)
 
 
 @require_POST

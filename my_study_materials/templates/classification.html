@@ -13,7 +13,13 @@
 
 <div class="container mt-5 py-4 px-4">
   <div class="d-flex justify-content-between align-items-center">
-    <h2>{{category.name}} > {{classification.name}}</h2>
+    <h2>
+        <strong>
+          <a class="text-decoration-none text-body" href="{% url 'category_detail' category_id=category.id %}">{{category.name}}</a> &gt;
+          <a class="text-decoration-none text-body" href="{% url 'classification_detail' category_id=category.id classification_id=classification.id %}">{{classification.name}}</a>
+       </strong>
+    </h2>
+
     <div>
       <a id="sortDataByName">
        <span class="sort-bold">이름순</span>

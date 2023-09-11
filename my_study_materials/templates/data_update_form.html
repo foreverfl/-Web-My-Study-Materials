@@ -5,34 +5,48 @@
 <div class="container m-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-        <form id="data_update_form" method="post" class="mt-5">
-            {% csrf_token %}
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label for="frequency" class="form-label">빈도</label>
-                        <div class="input-group">
-                            <button type="button" class="btn btn-outline-secondary" id="decreaseFrequency">-</button>
-                            <input type="input" class="form-control text-center" id="frequency" name="frequency" value="{{ data.frequency }}" required readonly>
-                            <button type="button" class="btn btn-outline-secondary" id="increaseFrequency">+</button>
+            <form id="data_update_form" method="post" class="mt-5">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="frequency" class="form-label">빈도</label>
+                            <div class="input-group">
+                                <button type="button" class="btn btn-outline-secondary" id="decreaseFrequency">-</button>
+                                <input type="input" class="form-control text-center" id="frequency" name="frequency" value="{{ data.frequency }}" required readonly>
+                                <button type="button" class="btn btn-outline-secondary" id="increaseFrequency">+</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="mb-3">
-                <label for="name" class="form-label">개념</label>
-                <input type="text" class="form-control" id="name" name="name" value="{{ data.name }}" required>
-            </div>
- 
-            <div class="mb-3">
-                <label for="features" class="form-label">설명</label>
-                <textarea class="form-control" id="description" name="description" rows="30">{{ data.description|safe }}</textarea>
-            </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="classification" class="form-label">목차</label>
+                            <select class="form-select" id="classification" name="classification">
+                                {% for classification in classifications %}
+                                    <option value="{{ classification.id }}" {% if classification.id == data.classification.id %}selected{% endif %}>
+                                        {{ classification.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="name" class="form-label">개념</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ data.name }}" required>
+                </div>
+    
+                <div class="mb-3">
+                    <label for="features" class="form-label">설명</label>
+                    <textarea class="form-control" id="description" name="description" rows="30">{{ data.description|safe }}</textarea>
+                </div>
 
-            <div class="row justify-content-center pt-3">
-                <button type="submit" class="btn btn-primary col-3">수정</button>
-            </div>
-        </form>
+                <div class="row justify-content-center pt-3">
+                    <button type="submit" class="btn btn-primary col-3">수정</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -102,7 +116,10 @@
                         alert(json.errors || "데이터를 업데이트하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
                     }
                 } else {
-                    window.location.href = "{% url 'data_detail' category_id=category_id classification_id=classification_id data_id=data.id %}";  // 리다이렉트
+                    const updatedClassificationId = formData.get('classification');
+                    const newUrl = `/category/{{ category_id }}/classification/${updatedClassificationId}/data/{{ data.id }}/`;
+                    console.log(newUrl);
+                    window.location.href = newUrl;
                 }
             } catch (error) {
                 console.error("Fetch error:", error);

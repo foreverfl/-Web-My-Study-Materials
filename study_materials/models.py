@@ -40,6 +40,7 @@ class Notice(models.Model):  # Notice 테이블
 class Category(models.Model):  # Category 테이블
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
+    description = models.TextField()
     is_public = models.BooleanField(default=True)
 
 

@@ -20,10 +20,14 @@
 </div>
 
 <div class="container mt-5">
-  <h2>{{ category.name }}</h2>
+    <h2>
+        <strong>
+          <a class="text-decoration-none text-body" href="{% url 'category_detail' category_id=category.id %}">{{category.name}}</a>         
+       </strong>
+    </h2>
   <hr>
   <ul class="list-group" id="classificationList">
-    {% for classification in category.classification_set.all %}
+    {% for classification in classifications %}
       <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
         <a class="text-decoration-none" href="{% url 'classification_detail' category.id classification.id %}">{{ classification.name }}</a>
         <button type="button" class="btn btn-danger btn-sm delete-button" style="display: none;" id="deleteButton{{ classification.id }}">삭제</button>        

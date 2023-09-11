@@ -59,11 +59,11 @@
 
         <!-- Profile -->
         <div class="navbar-nav ml-auto pe-3">
-          <div class="nav-item dropdown">
+          <div class="nav-item dropdown position-relative">
             <a class="nav-link" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <img src="{% static 'bootstrap-icons-1.10.5/person-circle.svg'%}" alt="person" width="30" height="30" />
             </a>
-            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+            <div class="dropdown-menu dropdown-menu-end position-absolute" style="top: 100%; right: 0;" aria-labelledby="navbarDropdown">
               {% if user.is_authenticated %}
                 <p class="dropdown-item text-center disabled">{{ user.last_name }} {{ user.first_name }}님 환영합니다!</p>
                 
@@ -104,7 +104,7 @@
               <div class="collapse" id="categoryButtons">
                 <li class="nav-item rounded d-flex flex-xl-row flex-md-column justify-content-center gap-3">            
                   <a class="btn btn-sm btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#categoryCreateModal">추가</a>
-                  <a class="btn btn-sm btn-outline-secondary" href="#" data-bs-toggle="modal" data-bs-target="#categoryUpdateModal">수정</a>
+                  <a class="btn btn-sm btn-outline-secondary" href="#" id="updateCategoryBtn" data-bs-target="#categoryUpdateModal">수정</a>
                   <a class="btn btn-sm btn-outline-danger" href="#" id="deleteCategoryBtn">삭제</a>
                 </li>
               </div>
@@ -117,6 +117,7 @@
               <li class="sidebar-category nav-item rounded d-flex justify-content-center">
                   <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
                   <button class="btn btn-sm btn-danger delete-category-button" data-category-id="{{ category.id }}" style="display: none;">삭제</button>
+                  <button class="btn btn-sm btn-secondary update-category-button" data-category-id="{{ category.id }}" style="display: none;">수정</button>
               </li>
               {% endfor %}
 
@@ -132,8 +133,12 @@
 
               <hr>
 
-              <!-- All Categories -->
-              <p class="fw-bold d-flex justify-content-center">All Categories</p>
+              <!-- Others -->
+              <li class="sidebar-category nav-item rounded d-flex justify-content-center">
+                  <!-- All Categories -->
+                  <a class="nav-link fw-bold text-decoration-none text-dark" href="{% url 'category_list' %}">All Categories</a>
+              </li>
+              
             </ul>
           </div>
         </div>
@@ -167,8 +172,20 @@
         </div>
         <div class="modal-body">
           <form id="categoryForm">
-            <div class="form-group">
+            <!-- 공개/비공개 드롭다운 -->
+            <div class="form-group d-flex justify-content-end mb-3">
+              <select id="category_is_public" name="is_public" class="form-control w-auto">
+                <option value="true" style="text-align: center;">공개</option>
+                <option value="false" style="text-align: center;">비공개</option>
+              </select>
+            </div>
+            <!-- 제목 -->
+            <div class="form-group mb-3">
               <input type="text" class="form-control" id="category-name" name="name" placeholder="카테고리명">
+            </div>
+            <!-- 설명 텍스트 필드 -->
+            <div class="form-group mb-3">
+              <textarea class="form-control" id="category-description" name="description" placeholder="설명" rows="10"></textarea>
             </div>
           </form>
         </div>
@@ -180,50 +197,30 @@
     </div>
   </div>
 
-  <!-- Update Category-->  
-  <div class="modal fade" id="categoryUpdateModal" tabindex="-1" aria-labelledby="categoryUpdateModal" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">카테고리 수정</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <form id="CategoryUpdateForm" method="post" action="{% url 'category_update' %}">
-              {% csrf_token %}
-              {% for category in current_user_categories %}
-              <div class="mb-3">
-                <!-- forloop.counter0: Django 템플릿 태그에서 사용되는 반복문의 카운터변수 -->
-                <input type="hidden" name="category_id_{{ forloop.counter0 }}" value="{{ category.id }}">
-                <input type="text" class="form-control" id="categoryName" name="category_name_{{ forloop.counter0 }}" value="{{ category.name }}" required>
-              </div>
-              {% endfor %}
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-            <button type="submit" class="btn btn-primary" form="CategoryUpdateForm">저장</button>
-          </div>
-        </div>
+  <!-- footer -->
+  <footer class="bg-light text-muted text-center">
+    <div class="container-fluid px-5 py-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-center">
+        <p class="mb-0" style="font-size: 12px;">
+          대표이사: JEON MYEONG KYU | 상호: My Dictionary | 사업자등록번호: 619-09-28407 | 이메일: forever_fl@naver.com 
+        </p>
+        <p class="mb-0" style="font-size: 12px;">Copyright © 2023 All rights reserved.</p>
       </div>
-    </div> 
-
-    <!-- footer -->
-    <footer class="bg-light text-muted text-center">
-      <div class="container-fluid px-5 py-4">
-        <div class="d-flex flex-wrap justify-content-between align-items-center">
-          <p class="mb-0" style="font-size: 12px;">
-            대표이사: JEON MYEONG KYU | 상호: My Dictionary | 사업자등록번호: 619-09-28407 | 이메일: forever_fl@naver.com 
-          </p>
-          <p class="mb-0" style="font-size: 12px;">Copyright © 2023 All rights reserved.</p>
-        </div>
-      </div>
-    </footer>
+    </div>
+  </footer>
   </body>
 
   <!-- Bootstrap JS and jQuery -->
   <script src="{% static 'bootstrap-5.3.1-dist/js/bootstrap.bundle.min.js' %}"></script>
   <script>
+    // 카테고리 공개/비공개
+    // |yesno: Boolean 값을 다른 문자열 값으로 변환
+    const isSubscribed = {{ request.user.subscription.is_subscribed|yesno:"true,false" }};
+    const categoryIsPublic = document.getElementById('category_is_public');
+    if (!isSubscribed) {
+      categoryIsPublic.disabled = true;  // 비활성화
+    }
+
     // 카테고리 추가
     document.addEventListener('DOMContentLoaded', function(){
       
@@ -266,59 +263,53 @@
       });
     });
 
-    // 카테고리 수정
-    document.addEventListener("DOMContentLoaded", function(){
-      const categoryUpdateForm = document.querySelector("#CategoryUpdateForm");
-
-      categoryUpdateForm.addEventListener("submit", async function(event){
-        event.preventDefault();
-
-        const formData = new FormData(this);
-
-        try {
-          const response = await fetch("{% url 'category_update' %}", {
-            method: "POST",
-            headers: {
-              'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: formData
-          });
-          
-          if (response.status >= 400 && response.status < 500) {
-            const json = await response.json();
-            if (json.errors === "Category name already exists") {
-              alert("이미 존재하는 카테고리 이름입니다.");
-            } else {
-              alert(json.errors || "카테고리를 추가하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
-            }
-            return;
-          } 
-
-          location.reload();
-
-        } catch (error) {
-          alert("서버와의 통신에 실패했습니다.");
-        }
-      });
-    });
-
-    // 카테고리 제거
+    // 카테고리 수정 및 삭제
     document.addEventListener('DOMContentLoaded', function() {
+      var editCategoryBtn = document.querySelector('#updateCategoryBtn');
       var deleteCategoryBtn = document.querySelector('#deleteCategoryBtn');
-      if(!deleteCategoryBtn) {
-        return;
-      }
-    
+
+      var updateButtonsVisible = false;
       var deleteButtonsVisible = false;
 
-      document.querySelector('#deleteCategoryBtn').addEventListener('click', function() {
-        deleteButtonsVisible = !deleteButtonsVisible;
-        deleteCategoryBtn.textContent = deleteButtonsVisible ? '취소' : '삭제'; // 텍스트 값 변경
-        document.querySelectorAll('.delete-category-button').forEach(function(button) {
-          button.style.display = deleteButtonsVisible ? 'block' : 'none';
+      // 수정 버튼
+      if(editCategoryBtn) {
+        editCategoryBtn.addEventListener('click', function() {
+          updateButtonsVisible = !updateButtonsVisible;
+
+          if (deleteButtonsVisible) {
+            deleteButtonsVisible = false;
+            deleteCategoryBtn.textContent = '삭제';
+            toggleButtons('.delete-category-button', 'none');
+          }
+
+          editCategoryBtn.textContent = updateButtonsVisible ? '취소' : '수정';
+          toggleButtons('.update-category-button', updateButtonsVisible ? 'block' : 'none');
         });
-      });
-    
+      }
+
+      // 삭제 버튼
+      if(deleteCategoryBtn) {
+        deleteCategoryBtn.addEventListener('click', function() {
+          deleteButtonsVisible = !deleteButtonsVisible;
+
+          if (updateButtonsVisible) {
+            updateButtonsVisible = false;
+            editCategoryBtn.textContent = '수정';
+            toggleButtons('.update-category-button', 'none');
+          }
+
+          deleteCategoryBtn.textContent = deleteButtonsVisible ? '취소' : '삭제';
+          toggleButtons('.delete-category-button', deleteButtonsVisible ? 'block' : 'none');
+        });
+      }
+
+      function toggleButtons(selector, displayStyle) {
+        document.querySelectorAll(selector).forEach(function(button) {
+          button.style.display = displayStyle;
+        });
+      }
+
+      // 카테고리 삭제
       document.querySelectorAll('.delete-category-button').forEach(function(button) {
         button.addEventListener('click', function() {
           var categoryId = this.getAttribute('data-category-id');
@@ -331,6 +322,14 @@
           }).then(function() {
             location.reload();
           });
+        });
+      });
+
+      // 카테고리 수정
+      document.querySelectorAll('.update-category-button').forEach(function(button) {
+        button.addEventListener('click', function() {
+          var categoryId = this.getAttribute('data-category-id');
+          console.log("선택한 카테고리 ID:", categoryId);
         });
       });
     });

@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block content %}
+    <div class="container mt-4">
+        <!-- 정렬 옵션을 표시할 부분 -->
+        <div class="d-flex justify-content-end mb-3">
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    정렬
+                </button>
+                <div class="dropdown-menu dropdown-menu-end">
+                    <a class="dropdown-item" href="#">인기순</a>
+                    <a class="dropdown-item" href="#">최신순</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 카테고리 카드들을 표시할 부분 -->
+        <div class="row">
+            <!-- Django의 for 태그를 사용하여 카테고리 객체를 순회 -->
+            {% for category in categories %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <!-- 카드 헤더에 유저 이름 표시 -->
+                    <div class="card-header">
+                        {{ category.user }}
+                    </div>
+                    <div class="card-body">
+                        <!-- 카드 제목에 카테고리 이름 표시 -->
+                        <h5 class="card-title">{{ category.name }}</h5>
+                        <!-- 카드 내용에 카테고리 설명 표시 -->
+                        <p class="card-text">{{ category.description }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
