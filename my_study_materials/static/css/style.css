@@ -12,10 +12,10 @@
   font-style: normal;
 }
 
-/* 아이패트보다 작은 화면 */
+/* 아이패드보다 작은 화면 */
 @media (max-width: 991px) {
-  .adsbygoogle {
-    display: none !important;
+  .desktop-ad {
+    display: none;
   }
 }
 
