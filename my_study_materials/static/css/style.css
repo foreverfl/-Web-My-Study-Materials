@@ -12,6 +12,13 @@
   font-style: normal;
 }
 
+/* 아이패트보다 작은 화면 */
+@media (max-width: 991px) {
+  .adsbygoogle {
+    display: none !important;
+  }
+}
+
 body,
 h1,
 h2,
