@@ -154,14 +154,32 @@
           <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4751026650729929"
               crossorigin="anonymous"></script>
           <!-- vertical -->
-          <ins class="adsbygoogle"
-              style="display:block"
-              data-ad-client="ca-pub-4751026650729929"
-              data-ad-slot="4768114162"
-              data-ad-format="auto"
-              data-full-width-responsive="true"></ins>
+          <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4751026650729929" crossorigin="anonymous"></script>
           <script>
-              (adsbygoogle = window.adsbygoogle || []).push({});
+              // 페이지가 로드되면 실행되는 함수
+              window.addEventListener('load', function() {
+                  // ad-wrapper 요소의 display 속성을 확인합니다.
+                  var adWrapper = document.getElementById("ad-wrapper");
+                  var displayStyle = window.getComputedStyle(adWrapper, null).display;
+
+                  // display 속성이 'none'이 아닌 경우만 광고를 로드합니다.
+                  if (displayStyle !== "none") {
+                      // ins 태그를 동적으로 생성합니다.
+                      var insElem = document.createElement('ins');
+                      insElem.className = "adsbygoogle";
+                      insElem.style.display = "block";
+                      insElem.setAttribute("data-ad-client", "ca-pub-4751026650729929");
+                      insElem.setAttribute("data-ad-slot", "4768114162");
+                      insElem.setAttribute("data-ad-format", "auto");
+                      insElem.setAttribute("data-full-width-responsive", "true");
+
+                      // ins 태그를 ad-wrapper 요소에 추가합니다.
+                      adWrapper.appendChild(insElem);
+
+                      // 광고를 로드합니다.
+                      (adsbygoogle = window.adsbygoogle || []).push({});
+                  }
+              });
           </script>
         </div>
 
