@@ -14,8 +14,8 @@
 
 /* 아이패드보다 작은 화면 */
 @media (max-width: 991px) {
-  .desktop-ad {
-    display: none;
+  .adsbygoogle {
+    display: none !important;
   }
 }
 
