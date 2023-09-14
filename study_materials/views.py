@@ -164,7 +164,6 @@ def category_list(request):
 
 
 def category_detail(request, category_id):
-    logger.info('test')
     category = get_object_or_404(Category, pk=category_id)
     categories = Category.objects.all()
     classifications = Classification.objects.filter(
