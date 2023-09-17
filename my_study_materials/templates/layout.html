@@ -3,8 +3,10 @@
 
 <!DOCTYPE html>
 <html>
-  <title>My Study Materials</title>
-  <meta name="description" content="나만의 공부자료를 정리하고 공유하는 사이트">
+  <title>{% block title %}My Study Materials{% endblock %}</title>
+  <!-- 모바일 반응형 디자인 설정 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{% block meta_description %}나만의 공부자료를 정리하고 공유하는 사이트{% endblock %}">
   
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
@@ -28,7 +30,132 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4751026650729929"
     crossorigin="anonymous"></script>
   <body>
-    <nav class="navbar navbar-expand-lg pt-4">
+    <!-- Buttons for Mobile -->
+    <div class="d-flex justify-content-between align-items-center">
+      <!-- Search & Sidebar -->
+      <button class="btn d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar-button" aria-controls="sidebar-button">
+        <img src="{% static 'bootstrap-icons-1.10.5/list.svg'%}" alt="menu" width="30" height="30" />
+      </button>
+
+      <!-- Profile -->
+      <div class="navbar-nav ml-auto pe-3">
+        <div class="nav-item dropdown position-relative">
+          <a class="nav-link" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <img src="{% static 'bootstrap-icons-1.10.5/person-circle.svg'%}" alt="person" width="30" height="30" />
+          </a>
+          <div class="dropdown-menu dropdown-menu-end position-absolute" style="top: 100%; right: 0;" aria-labelledby="navbarDropdown">
+              {% if user.is_authenticated %}
+                <p class="dropdown-item text-center disabled">{{ user.last_name }} {{ user.first_name }}님 환영합니다!</p>
+                
+                {% if user.is_staff %}
+                <p class="dropdown-item text-center disabled">관리자</p>
+                {% elif subscription.is_subscribed %}
+                <p class="dropdown-item text-center disabled">유료회원</p>
+                {% else %}
+                <p class="dropdown-item text-center disabled">무료회원</p>
+              {% endif %}
+
+              {% if not subscription.is_subscribed %}
+                <a class="dropdown-item text-center" href="{% url 'payment_describe' %}">구독하기</a>
+                <hr>
+              {% endif %}                
+                <a class="dropdown-item text-center" href="{% url 'account_logout' %}">로그아웃</a>
+              {% else %}
+                <a class="dropdown-item text-center" href="{% url 'account_login' %}">로그인</a>
+              {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar-button" aria-labelledby="sidebar-button">
+      <div class="offcanvas-header">
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <!-- Search Bar -->
+        <div>
+          <div class="d-flex justify-content-center my-5"> <!-- mb-3 클래스로 아래 여백을 추가 -->
+            <form class="row g-3" action="{% url 'search' %}" method="get">
+              <div class="col-auto">
+                <input
+                  class="form-control mr-sm-2"
+                  type="text"
+                  name="q"
+                  value="{{ request.GET.q }}"
+                  placeholder="Search"
+                  aria-label="Search"
+                />
+              </div>
+              <div class="col-auto">
+                <button class="btn btn-outline-primary my-sm-0" type="submit">
+                  <img
+                    src="{% static 'bootstrap-icons-1.10.5/search.svg'%}"
+                    alt="search"
+                    width="15"
+                    height="15"
+                  />
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Left sidebar -->
+        <div>
+          <div class="sidebar-sticky">
+            <ul class="nav flex-column gap-3">
+              <!-- CRUD -->
+              {% if user.is_authenticated %}
+              <p id="category-settings" class="fw-bold d-flex justify-content-center" data-bs-toggle="collapse" data-bs-target="#categoryButtons">My Categories Settings
+                <img id="category-caret-icon" class="align-self-center ms-2" src="{% static 'bootstrap-icons-1.10.5/caret-down-fill.svg'%}" alt="caret-down-fill" width="10" height="10" />                   
+              </p>
+              <div class="collapse" id="categoryButtons">
+                <li class="nav-item rounded d-flex flex-xl-row flex-md-column justify-content-center gap-3">            
+                  <a class="btn btn-sm btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#categoryCreateModal">추가</a>
+                  <a class="btn btn-sm btn-outline-secondary" href="#" id="updateCategoryBtn" data-bs-target="#categoryUpdateModal">수정</a>
+                  <a class="btn btn-sm btn-outline-danger" href="#" id="deleteCategoryBtn">삭제</a>
+                </li>
+              </div>
+              <hr>
+              {% endif %}
+
+              <!--User Category -->
+              <p class="fw-bold d-flex justify-content-center">My Categories</p>
+              {% for category in current_user_categories %}
+              <li class="sidebar-category nav-item rounded d-flex justify-content-center">
+                  <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
+                  <button class="btn btn-sm btn-danger delete-category-button" data-category-id="{{ category.id }}" style="display: none;">삭제</button>
+                  <button class="btn btn-sm btn-secondary update-category-button" data-category-id="{{ category.id }}" style="display: none;">수정</button>
+              </li>
+              {% endfor %}
+
+              <hr>
+
+              <!-- Added Categories (default: Admin Category)-->
+              <p class="fw-bold d-flex justify-content-center">Added Categories</p>
+              {% for category in admin_categories %}
+              <li class="sidebar-category nav-item rounded d-flex justify-content-center">
+                  <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
+              </li>
+              {% endfor %}
+
+              <hr>
+
+              <!-- Others -->
+              <li class="sidebar-category nav-item rounded d-flex justify-content-center">
+                  <!-- All Categories -->
+                  <a class="nav-link fw-bold text-decoration-none text-dark" href="{% url 'category_list' %}">All Categories</a>
+              </li>
+              
+            </ul>
+          </div>
+        </div>                   
+      </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg pt-4 d-none d-lg-block">
       <div class="container-fluid">
         <!-- Logo -->
         <a class="navbar-brand ps-5" href="/">My Study<br>Materials</a>
@@ -90,10 +217,10 @@
       </div>
     </nav>
     
-    <div class="container-fluid">
-      <div class="row">
+    <div class="container-fluid min-vh-100 d-flex flex-column">
+      <div class="row flex-grow-1">
         <!-- Left sidebar -->
-        <div class="col-xl-2 col-md-2 sidebar py-5">
+        <div class="col-xl-2 col-md-2 d-none d-md-block sidebar py-5">
           <div class="sidebar-sticky">
             <ul class="nav flex-column gap-3">
               <!-- CRUD -->
@@ -144,13 +271,13 @@
         </div>
 
         <!-- Content will be inserted here -->
-        <div class="col-xl-8 col-md-10">
+        <div class="col-xl-8 col-md-10 col-12">
             {% block content %}{% endblock %}
         </div>
 
         <!-- Right sidebar (Desktop version) -->
         <!-- d-xl-flex: xl 화면 크기에서만 flexbox 컨테이너로 만듦-->
-        <div class="col-xl-2 d-xl-flex justify-content-center align-items-center position-fixed" style="height:80vh; right: 0">
+        <div class="col-xl-2 d-none d-xl-flex justify-content-center align-items-center position-fixed" style="height:80vh; right: 0">
           <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4751026650729929"
               crossorigin="anonymous"></script>
           <!-- vertical -->
@@ -164,7 +291,7 @@
         </div>
 
         <!-- Right sidebar (Mobile and Tablet version) -->
-        <div class="d-none d-xl-none col-12 justify-content-center align-items-center">
+        <div class="d-none col-12 justify-content-center align-items-center">
           
         </div>
 
@@ -207,21 +334,22 @@
     </div>
   </div>
 
-  <!-- footer -->
-  <footer class="bg-light text-muted text-center">
-    <div class="container-fluid px-5 py-4">
-      <div class="d-flex flex-wrap justify-content-between align-items-center">
-        <p class="mb-0" style="font-size: 12px;">
-          대표이사: MYEONGKYU JEON | 상호: My Dictionary | 사업자등록번호: 619-09-28407 | 이메일: forever_fl@naver.com 
-        </p>
-        <p class="mb-0" style="font-size: 12px;">Copyright © 2023 All rights reserved.</p>
+    <!-- footer -->
+    <footer class="bg-light text-muted" id="footer">
+      <div class="container-fluid px-5 py-4">
+        <div class="d-flex flex-column flex-md-row align-items-center justify-content-center justify-content-md-between">
+          <p class="mb-2 mb-md-0 text-center" style="font-size: 12px;">
+            대표이사: MYEONGKYU JEON | 상호: My Dictionary | 사업자등록번호: 619-09-28407 | 이메일: forever_fl@naver.com 
+          </p>
+          <p class="mb-0 text-center" style="font-size: 12px;">Copyright © 2023 All rights reserved.</p>
+        </div>
       </div>
-    </div>
-  </footer>
+    </footer>
   </body>
 
   <!-- Bootstrap JS and jQuery -->
   <script src="{% static 'bootstrap-5.3.1-dist/js/bootstrap.bundle.min.js' %}"></script>
+  <script async src="https://fundingchoicesmessages.google.com/i/pub-4751026650729929?ers=1" nonce="V_FGw5ioxMgOVrxyI6m2nw"></script><script nonce="V_FGw5ioxMgOVrxyI6m2nw">(function() {function signalGooglefcPresent() {if (!window.frames['googlefcPresent']) {if (document.body) {const iframe = document.createElement('iframe'); iframe.style = 'width: 0; height: 0; border: none; z-index: -1000; left: -1000px; top: -1000px;'; iframe.style.display = 'none'; iframe.name = 'googlefcPresent'; document.body.appendChild(iframe);} else {setTimeout(signalGooglefcPresent, 0);}}}signalGooglefcPresent();})();</script>
   <script>
     // 카테고리 공개/비공개
     // |yesno: Boolean 값을 다른 문자열 값으로 변환

@@ -11,28 +11,36 @@
   {% endif %}
 </div>
 
-<div class="container mt-5 py-4 px-4">
-  <div class="d-flex justify-content-between align-items-center">
-    <h2>
+<div class="container py-4 px-4">
+  <div class="row">
+    <!-- 목차 -->
+    <div class="col-12 text-start my-4"> 
+      <h2>
         <strong>
           <a class="text-decoration-none text-body" href="{% url 'category_detail' category_id=category.id %}">{{category.name}}</a> &gt;
           <a class="text-decoration-none text-body" href="{% url 'classification_detail' category_id=category.id classification_id=classification.id %}">{{classification.name}}</a>
-       </strong>
-    </h2>
+        </strong>
+      </h2>
+    </div>
 
-    <div>
-      <a id="sortDataByName">
-       <span class="sort-bold">이름순</span>
-       <img id="sort-name-caret-icon" class="align-self-center" src="{% static 'bootstrap-icons-1.10.5/caret-up-fill.svg'%}" alt="caret-up-fill" width="10" height="10" />  
-      </a>
-      |
-      <a id="sortDataByFrequency">
-        <span>빈도순</span>
-        <img id="sort-frequency-caret-icon" class="align-self-center" src="{% static 'bootstrap-icons-1.10.5/caret-up-fill.svg'%}" alt="caret-up-fill" width="10" height="10" /> 
-      </a>
+    <!-- 정렬 버튼 -->
+    <div class="col-12 text-end"> 
+      <div>
+        <a id="sortDataByName">
+          <span class="sort-bold">이름순</span>
+          <img id="sort-name-caret-icon" class="align-self-center" src="{% static 'bootstrap-icons-1.10.5/caret-up-fill.svg'%}" alt="caret-up-fill" width="10" height="10" />  
+        </a>
+        |
+        <a id="sortDataByFrequency">
+          <span>빈도순</span>
+          <img id="sort-frequency-caret-icon" class="align-self-center" src="{% static 'bootstrap-icons-1.10.5/caret-up-fill.svg'%}" alt="caret-up-fill" width="10" height="10" /> 
+        </a>
+      </div>
     </div>
   </div>
+
   <hr>
+
   <ul class="list-group" id="classificationList">
   {% for data in first_page_data %}
     <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">

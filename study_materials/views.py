@@ -315,9 +315,15 @@ def classification_delete(request, category_id, classification_id):
 
 # Data
 def data_create_form(request, category_id, classification_id):
+    current_classification = get_object_or_404(
+        Classification, pk=classification_id)
+    classifications = Classification.objects.filter(
+        category=current_classification.category).order_by('name')
+
     context = {
         'category_id': category_id,
         'classification_id': classification_id,
+        'classifications': classifications,
     }
     return render(request, 'data_create_form.html', context)
 
@@ -351,11 +357,12 @@ def data_create(request, category_id, classification_id):
     # 폼에서 전송된 데이터 가져오기
     name = request.POST['name']
     description = request.POST['description']
-    frequency = 1
+    classification = request.POST['classification']
+    frequency = int(request.POST['frequency'])  # 숫자로 변환
 
     # Data 객체 생성 및 저장
     data = Data(
-        classification=Classification.objects.get(pk=classification_id),
+        classification=Classification.objects.get(id=classification),
         name=name,
         description=description,
         frequency=frequency
@@ -364,7 +371,7 @@ def data_create(request, category_id, classification_id):
 
     redirect_url = reverse('data_detail', kwargs={
         'category_id': category_id,
-        'classification_id': classification_id,
+        'classification_id': classification,
         'data_id': data.id
     })
 

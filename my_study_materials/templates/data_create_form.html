@@ -7,6 +7,32 @@
     <div class="col-md-8">
       <form id="dataForm" class="mt-5">
         {% csrf_token %}
+        <div class="row">
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label for="frequency" class="form-label">빈도</label>
+                    <div class="input-group">
+                        <button type="button" class="btn btn-outline-secondary" id="decreaseFrequency">-</button>
+                        <input type="input" class="form-control text-center" id="frequency" name="frequency" value="1" required>
+                        <button type="button" class="btn btn-outline-secondary" id="increaseFrequency">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label for="classification" class="form-label">목차</label>
+                    <select class="form-select" id="classification" name="classification">
+                        {% for classification in classifications %}
+                            <option value="{{ classification.id }}" {% if classification.id == data.classification.id %}selected{% endif %}>
+                                {{ classification.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
         <div class="mb-3">
           <label for="name" class="form-label">제목</label>
           <input type="text" class="form-control" id="name" name="name"></input>
@@ -23,7 +49,43 @@
 </div>
 
 <script>
+  function changeFrequency(value) {
+    var frequencyInput = document.getElementById('frequency');
+    var currentFrequency = parseInt(frequencyInput.value, 10);
+    var newFrequency = currentFrequency + value; // 새로운 빈도 계산
+    if (newFrequency >= 1 && newFrequency <= 10) {
+        frequencyInput.value = newFrequency;
+    }        
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
+      // 처음 페이지에 로딩될 때의 빈도값을 저장
+      var initialFrequency = document.getElementById('frequency').value;
+
+      // 빈도값이 변경되었는지 확인 후 배경색을 변경하는 함수
+      function checkFrequency() {
+          var currentFrequency = document.getElementById('frequency').value;
+          if (currentFrequency === initialFrequency) {  // 처음 값과 현재 값이 같다면 배경 색깔 변경
+              document.getElementById('frequency').style.backgroundColor = '#ebeded';
+          } else { // 같지 않다면 배경색을 기본값으로 설정
+              document.getElementById('frequency').style.backgroundColor = '';
+          }
+      }
+
+      // 감소 버튼에 클릭 이벤트 리스너 추가
+      document.getElementById('decreaseFrequency').addEventListener('click', function() {
+          changeFrequency(-1);
+          checkFrequency();
+      });
+
+      // 증가 버튼에 클릭 이벤트 리스너 추가
+      document.getElementById('increaseFrequency').addEventListener('click', function() {
+          changeFrequency(1);
+          checkFrequency();
+      });
+
+      checkFrequency(); // 페이지 로딩시 초기 배경색 설정
+
       const form = document.getElementById('dataForm');
 
       form.addEventListener('submit', async function(event) {
