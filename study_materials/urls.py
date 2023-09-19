@@ -13,6 +13,7 @@ from . import views
 from .sitemaps import StudyMaterialsSitemap
 from .views import my_sitemap
 
+
 sitemaps = {
     'study_materials': StudyMaterialsSitemap,
 }

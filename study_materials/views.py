@@ -18,7 +18,7 @@ from django.contrib.staticfiles import finders
 from django.core.exceptions import FieldError
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -521,6 +521,9 @@ def my_sitemap(request, **kwargs):
 
     # X-Robots-Tag 헤더를 원하는 값으로 설정
     response['X-Robots-Tag'] = 'index'
+
+    # Content-Type 헤더에 charset=UTF-8 추가
+    response['Content-Type'] = 'application/xml; charset=UTF-8'
 
     return response
 
