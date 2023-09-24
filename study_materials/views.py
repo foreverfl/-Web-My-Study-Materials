@@ -33,7 +33,7 @@ import requests
 # 애플리케이션 내부 모듈
 from .context_processors import common_context
 from .forms import CategoryForm, ClassificationForm, DataForm, NoticeForm
-from .models import Category, Classification, Data, Notice, Subscription
+from .models import Category, Classification, Data, Notice, Subscription, CategorySubscription
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -159,41 +159,51 @@ def category_create(request):
 
 def category_list(request):
     categories = Category.objects.filter(is_public=True)
+    context = {
+        'categories': categories,
+    }
 
-    return render(request, 'categories.html', {'categories': categories})
+    return render(request, 'categories.html', context)
 
 
 def category_detail(request, category_id):
-    category = get_object_or_404(Category, pk=category_id)
-    categories = Category.objects.all()
+    selected_category = get_object_or_404(Category, pk=category_id)
+
+    selected_category.subscriber_count = CategorySubscription.objects.filter(
+        category=selected_category).count()  # selected_category에 대한 subscriber_count 계산
+
+    is_subscribed = CategorySubscription.objects.filter(
+        user=request.user, category=selected_category).exists()
+
     classifications = Classification.objects.filter(
-        category=category).order_by('name')
+        category=selected_category).order_by('name')
     context = {
-        'categories': categories,
-        'category': category,
-        'classifications': classifications
+        'category': selected_category,
+        'classifications': classifications,
+        'is_subscribed': is_subscribed
     }
     return render(request, 'category.html', context)
 
 
 @require_POST
-def category_update(request):
+def category_update(request, category_id):
 
     user = request.user
+    category_name = request.POST.get('name')
+    category_description = request.POST.get('description')
+    category_is_public = request.POST.get('is_public') == 'true'
 
-    for index in range(len(request.POST)//2):
-        category_id = request.POST.get(f'category_id_{index}')
-        category_name = request.POST.get(f'category_name_{index}')
+    category = get_object_or_404(Category, id=category_id)
+    # 같은 이름의 카테고리 생성 제한
+    if Category.objects.filter(user=user, name=category_name).exclude(id=category_id).exists():
+        return JsonResponse({"status": "error", "errors": "Category name already exists"}, status=400)
 
-        category = get_object_or_404(Category, id=category_id)
-        # 같은 이름의 카테고리 생성 제한
-        if Category.objects.filter(user=user, name=category_name).exclude(id=category_id).exists():
-            return JsonResponse({"status": "error", "errors": "Category name already exists"}, status=400)
+    category.name = category_name
+    category.description = category_description
+    category.is_public = category_is_public
+    category.save()
 
-        category.name = category_name
-        category.save()
-
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse('index')))
+    return JsonResponse({"status": "success"}, status=201)
 
 
 @require_POST  # POST 요청만을 받아들이도록 강제
@@ -204,6 +214,19 @@ def category_delete(request, category_id):
         return JsonResponse({'status': 'ok'})
     except Category.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': '카테고리를 찾을 수 없습니다.'}, status=404)
+
+
+@login_required
+def category_subscribe(request, category_id):
+    selected_category = get_object_or_404(Category, pk=category_id)
+    subscription, created = CategorySubscription.objects.get_or_create(
+        user=request.user, category=selected_category)
+
+    if created:
+        return JsonResponse({'status': 'subscribed'})
+
+    subscription.delete()
+    return JsonResponse({'status': 'unsubscribed'})
 
 
 # Classification

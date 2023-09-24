@@ -25,7 +25,7 @@
                     <label for="classification" class="form-label">목차</label>
                     <select class="form-select" id="classification" name="classification">
                         {% for classification in classifications %}
-                            <option value="{{ classification.id }}" {% if classification.id == data.classification.id %}selected{% endif %}>
+                            <option value="{{ classification.id }}" {% if classification.id == classification_id %}selected{% endif %}>
                                 {{ classification.name }}
                             </option>
                         {% endfor %}

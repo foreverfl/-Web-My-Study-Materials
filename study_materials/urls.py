@@ -45,10 +45,12 @@ urlpatterns = [
          views.category_list, name='category_list'),
     path('category/<int:category_id>/',
          views.category_detail, name='category_detail'),
-    path('category/update/',
+    path('category/<int:category_id>/update/',
          views.category_update, name='category_update'),
     path('category/<int:category_id>/delete/',
          views.category_delete, name='category_delete'),
+    path('category/<int:category_id>/subscribe/',
+         views.category_subscribe, name='category_subscribe'),
 
     # Classification
     path('category/<int:category_id>/classification/create/>', views.classification_create,

@@ -16,6 +16,14 @@
         </li>
       </ul>
     </div>
+  {% else %}  
+    {% if is_subscribed %}
+      <span class="fs-3 fw-bold clickable" id="subscribeToggle">★</span>
+    {% else %}
+      <span class="fs-3 fw-bold clickable" id="subscribeToggle">☆</span>
+    {% endif %}
+
+    <span class="fs-3 fw-bold">구독자: {{ category.subscriber_count|default:"0" }}명</span>
   {% endif %}
 </div>
 
@@ -206,6 +214,30 @@
 
     classificationButtons.addEventListener('hide.bs.collapse', function() { 
       classificationCaretIcon.src = "{% static 'bootstrap-icons-1.10.5/caret-down-fill.svg' %}";
+    });
+  });
+
+  // 구독하기
+  document.addEventListener("DOMContentLoaded", function() {
+    const subscribeToggle = document.getElementById("subscribeToggle");
+    const categoryId = {{ category.id }};
+    
+    subscribeToggle.addEventListener("click", function() {
+      fetch(`/category/${categoryId}/subscribe/`, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',  // AJAX 요청임을 명시
+          'X-CSRFToken': getCookie('csrftoken')  // CSRF 토큰
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'subscribed') {
+          subscribeToggle.textContent = "★";
+        } else {
+          subscribeToggle.textContent = "☆";
+        }
+      });
     });
   });
 </script>

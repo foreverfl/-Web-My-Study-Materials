@@ -23,14 +23,14 @@
   <meta property="twitter:image" content="{% static 'images/noun-study.png' %}">
 
   <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+  
+  <!--CSS -->
   <link rel="stylesheet" href="{% static 'bootstrap-5.3.1-dist/css/bootstrap.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/style.css'%}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/pygments.css' %}">
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4751026650729929"
-    crossorigin="anonymous"></script>
+  
   <body>
-    <!-- Buttons for Mobile -->
+    <!-- Mobile -->
     <div class="d-flex justify-content-between align-items-center">
       <!-- Search & Sidebar -->
       <button class="btn d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar-button" aria-controls="sidebar-button">
@@ -68,6 +68,7 @@
       </div>
     </div>
 
+    <!-- Search -->
     <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar-button" aria-labelledby="sidebar-button">
       <div class="offcanvas-header">
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -75,7 +76,7 @@
       <div class="offcanvas-body">
         <!-- Search Bar -->
         <div>
-          <div class="d-flex justify-content-center my-5"> <!-- mb-3 클래스로 아래 여백을 추가 -->
+          <div class="d-flex justify-content-center my-5"> 
             <form class="row g-3" action="{% url 'search' %}" method="get">
               <div class="col-auto">
                 <input
@@ -112,9 +113,9 @@
               </p>
               <div class="collapse" id="categoryButtons">
                 <li class="nav-item rounded d-flex flex-xl-row flex-md-column justify-content-center gap-3">            
-                  <a class="btn btn-sm btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#categoryCreateModal">추가</a>
-                  <a class="btn btn-sm btn-outline-secondary" href="#" id="updateCategoryBtn" data-bs-target="#categoryUpdateModal">수정</a>
-                  <a class="btn btn-sm btn-outline-danger" href="#" id="deleteCategoryBtn">삭제</a>
+                  <a class="btn btn-sm btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#create-category-modal">추가</a>
+                  <a class="btn btn-sm btn-outline-secondary" href="#" id="update-category-btn-mobile">수정</a>
+                  <a class="btn btn-sm btn-outline-danger" href="#" id="delete-category-btn-mobile">삭제</a>
                 </li>
               </div>
               <hr>
@@ -125,8 +126,8 @@
               {% for category in current_user_categories %}
               <li class="sidebar-category nav-item rounded d-flex justify-content-center">
                   <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
-                  <button class="btn btn-sm btn-danger delete-category-button" data-category-id="{{ category.id }}" style="display: none;">삭제</button>
-                  <button class="btn btn-sm btn-secondary update-category-button" data-category-id="{{ category.id }}" style="display: none;">수정</button>
+                  <button class="btn btn-sm btn-secondary update-category-sub-btn-mobile" data-category-id="{{ category.id }}" style="display: none;">수정</button>
+                  <button class="btn btn-sm btn-danger delete-category-sub-btn-mobile" data-category-id="{{ category.id }}" style="display: none;">삭제</button>
               </li>
               {% endfor %}
 
@@ -154,6 +155,7 @@
       </div>
     </div>
 
+    <!-- Desktop -->
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg pt-4 d-none d-lg-block">
       <div class="container-fluid">
@@ -230,33 +232,43 @@
               </p>
               <div class="collapse" id="categoryButtons">
                 <li class="nav-item rounded d-flex flex-xl-row flex-md-column justify-content-center gap-3">            
-                  <a class="btn btn-sm btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#categoryCreateModal">추가</a>
-                  <a class="btn btn-sm btn-outline-secondary" href="#" id="updateCategoryBtn" data-bs-target="#categoryUpdateModal">수정</a>
-                  <a class="btn btn-sm btn-outline-danger" href="#" id="deleteCategoryBtn">삭제</a>
+                  <a class="btn btn-sm btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#create-category-modal">추가</a>
+                  <a class="btn btn-sm btn-outline-secondary" href="#" id="update-category-btn">수정</a>
+                  <a class="btn btn-sm btn-outline-danger" href="#" id="delete-category-btn">삭제</a>
                 </li>
               </div>
               <hr>
               {% endif %}
 
-              <!--User Category -->
+              <!-- User Category -->
               <p class="fw-bold d-flex justify-content-center">My Categories</p>
-              {% for category in current_user_categories %}
-              <li class="sidebar-category nav-item rounded d-flex justify-content-center">
-                  <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
-                  <button class="btn btn-sm btn-danger delete-category-button" data-category-id="{{ category.id }}" style="display: none;">삭제</button>
-                  <button class="btn btn-sm btn-secondary update-category-button" data-category-id="{{ category.id }}" style="display: none;">수정</button>
-              </li>
-              {% endfor %}
+              {% if user.is_authenticated %}                
+                {% for category in current_user_categories %}
+                <li class="sidebar-category nav-item rounded d-flex justify-content-center">
+                    <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
+                    <button class="btn btn-sm btn-danger delete-category-sub-btn" data-category-id="{{ category.id }}" style="display: none;">삭제</button>
+                    <button class="btn btn-sm btn-secondary update-category-sub-btn" data-category-id="{{ category.id }}" style="display: none;">수정</button>
+                </li>
+                {% endfor %}
+              {% endif %}
 
               <hr>
 
               <!-- Added Categories (default: Admin Category)-->
               <p class="fw-bold d-flex justify-content-center">Added Categories</p>
-              {% for category in admin_categories %}
-              <li class="sidebar-category nav-item rounded d-flex justify-content-center">
-                  <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
-              </li>
-              {% endfor %}
+              {% if user.is_authenticated %}
+                  {% for category in subscribed_categories %}
+                  <li class="sidebar-category nav-item rounded d-flex justify-content-center">
+                      <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
+                  </li>
+                  {% endfor %}
+              {% else %}
+                  {% for category in admin_categories %}
+                  <li class="sidebar-category nav-item rounded d-flex justify-content-center">
+                      <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
+                  </li>
+                  {% endfor %}
+              {% endif %}
 
               <hr>
 
@@ -270,7 +282,7 @@
           </div>
         </div>
 
-        <!-- Content will be inserted here -->
+        <!-- Content -->
         <div class="col-xl-8 col-md-10 col-12">
             {% block content %}{% endblock %}
         </div>
@@ -298,42 +310,6 @@
       </div>
     </div>
 
-  <!-- Modal -->
-  <!-- Create Category-->
-  <div class="modal fade" id="categoryCreateModal" tabindex="-1" role="dialog" aria-labelledby="categoryCreateModal" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addCategory">카테고리 추가</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form id="categoryForm">
-            <!-- 공개/비공개 드롭다운 -->
-            <div class="form-group d-flex justify-content-end mb-3">
-              <select id="category_is_public" name="is_public" class="form-control w-auto">
-                <option value="true" style="text-align: center;">공개</option>
-                <option value="false" style="text-align: center;">비공개</option>
-              </select>
-            </div>
-            <!-- 제목 -->
-            <div class="form-group mb-3">
-              <input type="text" class="form-control" id="category-name" name="name" placeholder="카테고리명">
-            </div>
-            <!-- 설명 텍스트 필드 -->
-            <div class="form-group mb-3">
-              <textarea class="form-control" id="category-description" name="description" placeholder="설명" rows="10"></textarea>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-          <button type="button" class="btn btn-primary" id="saveCategoryBtn">추가하기</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
     <!-- footer -->
     <footer class="bg-light text-muted" id="footer">
       <div class="container-fluid px-5 py-4">
@@ -345,25 +321,92 @@
         </div>
       </div>
     </footer>
+
+  <!-- Modal -->
+  <!-- Create Category Modal -->
+  <div class="modal fade" id="create-category-modal" tabindex="-1" role="dialog" aria-labelledby="category-create-modal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">카테고리 추가</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="create-category-form">
+            <!-- 공개/비공개 드롭다운 -->
+            <div class="form-group d-flex justify-content-end mb-3">
+              <select id="create-category-is-public" name="is_public" class="form-control w-auto">
+                <option value="true">공개</option>
+                <option value="false">비공개</option>
+              </select>
+            </div>
+            <!-- 제목 -->
+            <div class="form-group mb-3">
+              <input type="text" class="form-control" id="create-category-name" name="name" placeholder="카테고리명">
+            </div>
+            <!-- 설명 텍스트 필드 -->
+            <div class="form-group mb-3">
+              <textarea class="form-control" id="create-category-description" name="description" placeholder="설명" rows="10"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+          <button type="button" class="btn btn-primary" id="create-category-btn-modal">추가하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Update Category Modal -->
+  <div class="modal fade" id="update-create-modal" tabindex="-1" role="dialog" aria-labelledby="update-create-modal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">카테고리 수정</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="update-category-form">
+            <!-- 공개/비공개 드롭다운 -->
+            <div class="form-group d-flex justify-content-end mb-3">
+              <select id="update-category-is-public" name="is_public" class="form-control w-auto">
+                <option value="true">공개</option>
+                <option value="false">비공개</option>
+              </select>
+            </div>
+            <!-- 제목 -->
+            <div class="form-group mb-3">
+              <input type="text" class="form-control" id="update-category-name" name="name" placeholder="카테고리명">
+            </div>
+            <!-- 설명 텍스트 필드 -->
+            <div class="form-group mb-3">
+              <textarea class="form-control" id="update-category-description" name="description" placeholder="설명" rows="10"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+          <button type="button" class="btn btn-primary" id="update-category-btn-modal">수정하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   </body>
 
-  <!-- Bootstrap JS and jQuery -->
+  <!-- Bootstrap JS -->
   <script src="{% static 'bootstrap-5.3.1-dist/js/bootstrap.bundle.min.js' %}"></script>
   <script async src="https://fundingchoicesmessages.google.com/i/pub-4751026650729929?ers=1" nonce="V_FGw5ioxMgOVrxyI6m2nw"></script><script nonce="V_FGw5ioxMgOVrxyI6m2nw">(function() {function signalGooglefcPresent() {if (!window.frames['googlefcPresent']) {if (document.body) {const iframe = document.createElement('iframe'); iframe.style = 'width: 0; height: 0; border: none; z-index: -1000; left: -1000px; top: -1000px;'; iframe.style.display = 'none'; iframe.name = 'googlefcPresent'; document.body.appendChild(iframe);} else {setTimeout(signalGooglefcPresent, 0);}}}signalGooglefcPresent();})();</script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4751026650729929"
+    crossorigin="anonymous"></script>
   <script>
-    // 카테고리 공개/비공개
-    // |yesno: Boolean 값을 다른 문자열 값으로 변환
-    const isSubscribed = {{ request.user.subscription.is_subscribed|yesno:"true,false" }};
-    const categoryIsPublic = document.getElementById('category_is_public');
-    if (!isSubscribed) {
-      categoryIsPublic.disabled = true;  // 비활성화
-    }
-
-    // 카테고리 추가
+    // 카테고리 추가 및 수정
     document.addEventListener('DOMContentLoaded', function(){
       
-      document.querySelector("#saveCategoryBtn").addEventListener('click', function(){
-        var formElement = document.querySelector("#categoryForm");
+      // 카테고리 추가
+      document.querySelector("#create-category-btn-modal").addEventListener('click', function(){
+        var formElement = document.querySelector("#create-category-form");
         var formData = new FormData(formElement);
         
         for (var pair of formData.entries()) {
@@ -374,7 +417,7 @@
           method: 'POST',
           body: formData,
           headers: {
-            'X-CSRFToken': '{{ csrf_token }}', // Django의 CSRF 보호를 우회
+            'X-CSRFToken': '{{ csrf_token }}', 
           },
         })
         .then(response => {
@@ -399,12 +442,49 @@
           console.log('Error:', error);
         });
       });
+
+
+      // 카테고리 수정
+      document.querySelector("#update-category-btn-modal").addEventListener('click', function(){
+        var formElement = document.querySelector("#update-category-form");
+        var formData = new FormData(formElement);
+        var categoryId = formElement.getAttribute("data-category-id");
+        var updateUrl = "{% url 'category_update' category_id=0 %}".replace('0', categoryId);
+
+        fetch(updateUrl, { // Django에서 지정한 URL을 가져옴
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+          },
+        })
+        .then(response => {
+          if (!response.ok) {
+            return response.json().then(json => {
+              if (json.errors === "Category name already exists") {
+                alert("이미 존재하는 카테고리 이름입니다.");
+              } else {
+                alert(json.errors || "카테고리를 수정하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
+              }
+              throw new Error(`HTTP error! status: ${response.status}`);
+            });
+          }
+          return response.json();
+        })
+        .then(json => {
+          location.reload();
+        })
+        .catch((error) => {
+          console.log('Error:', error);
+        });
+      });
+
     });
 
-    // 카테고리 수정 및 삭제
+    // 카테고리 수정 및 삭제 버튼
     document.addEventListener('DOMContentLoaded', function() {
-      var editCategoryBtn = document.querySelector('#updateCategoryBtn');
-      var deleteCategoryBtn = document.querySelector('#deleteCategoryBtn');
+      var editCategoryBtn = document.querySelector('#update-category-btn');
+      var deleteCategoryBtn = document.querySelector('#delete-category-btn');
 
       var updateButtonsVisible = false;
       var deleteButtonsVisible = false;
@@ -417,11 +497,11 @@
           if (deleteButtonsVisible) {
             deleteButtonsVisible = false;
             deleteCategoryBtn.textContent = '삭제';
-            toggleButtons('.delete-category-button', 'none');
+            toggleButtons('.delete-category-sub-btn', 'none');
           }
 
           editCategoryBtn.textContent = updateButtonsVisible ? '취소' : '수정';
-          toggleButtons('.update-category-button', updateButtonsVisible ? 'block' : 'none');
+          toggleButtons('.update-category-sub-btn', updateButtonsVisible ? 'block' : 'none');
         });
       }
 
@@ -433,11 +513,11 @@
           if (updateButtonsVisible) {
             updateButtonsVisible = false;
             editCategoryBtn.textContent = '수정';
-            toggleButtons('.update-category-button', 'none');
+            toggleButtons('.update-category-sub-btn', 'none');
           }
 
           deleteCategoryBtn.textContent = deleteButtonsVisible ? '취소' : '삭제';
-          toggleButtons('.delete-category-button', deleteButtonsVisible ? 'block' : 'none');
+          toggleButtons('.delete-category-sub-btn', deleteButtonsVisible ? 'block' : 'none');
         });
       }
 
@@ -448,7 +528,7 @@
       }
 
       // 카테고리 삭제
-      document.querySelectorAll('.delete-category-button').forEach(function(button) {
+      document.querySelectorAll('.delete-category-sub-btn').forEach(function(button) {
         button.addEventListener('click', function() {
           var categoryId = this.getAttribute('data-category-id');
           fetch('/category/' + categoryId + '/delete/', {
@@ -464,10 +544,24 @@
       });
 
       // 카테고리 수정
-      document.querySelectorAll('.update-category-button').forEach(function(button) {
+      document.querySelectorAll('.update-category-sub-btn').forEach(function(button) {
         button.addEventListener('click', function() {
           var categoryId = this.getAttribute('data-category-id');
-          console.log("선택한 카테고리 ID:", categoryId);
+
+          const categoryInfo = currentUserCategories.find(function(category) {
+            return category.pk == categoryId;
+          });
+
+          document.querySelector("#update-category-form").setAttribute("data-category-id", categoryId);
+
+          // 모달에 정보 채우기
+          document.querySelector('#update-category-is-public').value = categoryInfo.fields.is_public.toString();
+          document.querySelector('#update-category-name').value = categoryInfo.fields.name;
+          document.querySelector('#update-category-description').value = categoryInfo.fields.description;
+
+          // 모달 표시
+          var updateModal = new bootstrap.Modal(document.getElementById('update-create-modal'));
+          updateModal.show();
         });
       });
     });

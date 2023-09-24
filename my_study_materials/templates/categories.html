@@ -2,39 +2,100 @@
 {% load static %}
 
 {% block content %}
+
+    <style>
+        /* 테이블 레이아웃 고정 */
+        table {
+            table-layout: fixed;
+            width: 100%;  /* 테이블 전체 너비 설정 */
+        }
+
+        /* 행의 비율을 조정 */
+        th:nth-child(1), td:nth-child(1) { width: 20%; }
+        th:nth-child(2), td:nth-child(2) { width: 60%; }
+        th:nth-child(3), td:nth-child(3) { width: 10%; }
+        th:nth-child(4), td:nth-child(4) { width: 10%; }
+
+        /* 텍스트가 셀을 벗어날 경우 ...으로 표시 */
+        .ellipsis div {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+    </style>
+
     <div class="container mt-4">
-        <!-- 정렬 옵션을 표시할 부분 -->
-        <div class="d-flex justify-content-end mb-3">
-            <div class="btn-group">
-                <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    정렬
-                </button>
-                <div class="dropdown-menu dropdown-menu-end">
-                    <a class="dropdown-item" href="#">인기순</a>
-                    <a class="dropdown-item" href="#">최신순</a>
-                </div>
-            </div>
+        <!-- 정렬 버튼 -->
+        <div class="col-12 text-end"> 
+            <a id="sortDataByName">
+            <span class="sort-bold">이름순</span>
+            <img id="sort-name-caret-icon" class="align-self-center" src="{% static 'bootstrap-icons-1.10.5/caret-up-fill.svg'%}" alt="caret-up-fill" width="10" height="10" />  
+            </a>
+            |
+            <a id="sortDataByFrequency">
+            <span>인기순</span>
+            <img id="sort-frequency-caret-icon" class="align-self-center" src="{% static 'bootstrap-icons-1.10.5/caret-up-fill.svg'%}" alt="caret-up-fill" width="10" height="10" /> 
+            </a>
         </div>
 
-        <!-- 카테고리 카드들을 표시할 부분 -->
-        <div class="row">
-            <!-- Django의 for 태그를 사용하여 카테고리 객체를 순회 -->
-            {% for category in categories %}
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <!-- 카드 헤더에 유저 이름 표시 -->
-                    <div class="card-header">
-                        {{ category.user }}
-                    </div>
-                    <div class="card-body">
-                        <!-- 카드 제목에 카테고리 이름 표시 -->
-                        <h5 class="card-title">{{ category.name }}</h5>
-                        <!-- 카드 내용에 카테고리 설명 표시 -->
-                        <p class="card-text">{{ category.description }}</p>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
+        <hr>
+
+        <!-- 카테고리 목록 -->
+        <div class="container">
+            <table class="table table-striped-columns table-hover">
+                <thead>
+                    <tr>
+                        <th class="text-center">제목</th>
+                        <th class="text-center">설명</th>
+                        <th class="text-center">아이디</th>
+                        <th class="text-center">구독자 수</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td class="ellipsis text-center">
+                            <div data-bs-toggle="tooltip" data-bs-placement="bottom">
+                                <a class="text-decoration-none" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
+                            </div>                            
+                        </td>
+                        <td class="ellipsis">
+                            <div data-bs-toggle="tooltip" data-bs-placement="bottom">{{ category.description }}</div>
+                        </td>
+                        <td class="ellipsis text-center">
+                            <div data-bs-toggle="tooltip" data-bs-placement="bottom">{{ category.user }}</div>
+                        </td>
+                        <td class="ellipsis text-center">
+                            <div data-bs-toggle="tooltip" data-bs-placement="bottom">100</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
+
+    <script>
+        // Tooltip
+        document.addEventListener("DOMContentLoaded", function(){      
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            const ellipsisElements = document.querySelectorAll(".ellipsis div");
+
+            ellipsisElements.forEach(function(element) {
+                // 'span' 태그를 제외한 텍스트만 가져와 'title' 속성에 설정
+                let textWithoutSpan = "";
+                for (const node of element.childNodes) {
+                    if (node.nodeType === 3) { // 텍스트 노드
+                        textWithoutSpan += node.nodeValue;
+                    }
+                }
+                element.setAttribute("title", textWithoutSpan.trim());
+            });
+        }); 
+    </script>
 {% endblock %}

@@ -12,6 +12,7 @@ import requests
 
 # print(os.path.join(BASE_DIR, 'my_study_materials', 'static'),)
 
-response = requests.get('http://localhost:8000/sitemap.xml')
+# response = requests.get('http://localhost:8000/sitemap.xml')
 
-print(f'Encoding: {response.encoding}')
+from django.conf import settings
+print(settings.ACCOUNT_ADAPTER)
