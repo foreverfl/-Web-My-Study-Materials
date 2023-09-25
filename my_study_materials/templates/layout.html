@@ -412,185 +412,188 @@
     crossorigin="anonymous"></script>
   <script>
     const currentUserCategories = {{ current_user_categories_json|safe }};
+    const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
 
-    // 카테고리 추가 및 수정
-    document.addEventListener('DOMContentLoaded', function(){
-      
-      // 카테고리 추가
-      document.querySelector("#create-category-btn-modal").addEventListener('click', function(){
-        var formElement = document.querySelector("#create-category-form");
-        var formData = new FormData(formElement);
+    if(isAuthenticated) {
+      // 카테고리 추가 및 수정
+      document.addEventListener('DOMContentLoaded', function(){
         
-        for (var pair of formData.entries()) {
-          console.log(pair[0] + ', ' + pair[1]); 
-        }
-    
-        fetch("{% url 'category_create' %}", { // Django에서 지정한 URL을 가져옴
-          method: 'POST',
-          body: formData,
-          headers: {
-            'X-CSRFToken': '{{ csrf_token }}', 
-          },
-        })
-        .then(response => {
-          if (!response.ok) {
-            return response.json().then(json => {
-              if (json.errors === "Maximum number of categories reached") {
-                alert("최대 카테고리 개수를 초과했습니다.");
-              } else if (json.errors === "Category name already exists") {
-                alert("이미 존재하는 카테고리 이름입니다.");
-              } else {
-                alert(json.errors || "카테고리를 추가하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
-              }
-              throw new Error(`HTTP error! status: ${response.status}`);
-            });
-          } 
-          return response.json();
-        })
-        .then(json => {
-          location.reload();
-        })
-        .catch((error) => {
-          console.log('Error:', error);
-        });
-      });
-
-
-      // 카테고리 수정
-      document.querySelector("#update-category-btn-modal").addEventListener('click', function(){
-        var formElement = document.querySelector("#update-category-form");
-        var formData = new FormData(formElement);
-        var categoryId = formElement.getAttribute("data-category-id");
-        var updateUrl = "{% url 'category_update' category_id=0 %}".replace('0', categoryId);
-
-        fetch(updateUrl, { // Django에서 지정한 URL을 가져옴
-          method: 'POST',
-          body: formData,
-          headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-          },
-        })
-        .then(response => {
-          if (!response.ok) {
-            return response.json().then(json => {
-              if (json.errors === "Category name already exists") {
-                alert("이미 존재하는 카테고리 이름입니다.");
-              } else {
-                alert(json.errors || "카테고리를 수정하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
-              }
-              throw new Error(`HTTP error! status: ${response.status}`);
-            });
+        // 카테고리 추가
+        document.querySelector("#create-category-btn-modal").addEventListener('click', function(){
+          var formElement = document.querySelector("#create-category-form");
+          var formData = new FormData(formElement);
+          
+          for (var pair of formData.entries()) {
+            console.log(pair[0] + ', ' + pair[1]); 
           }
-          return response.json();
-        })
-        .then(json => {
-          location.reload();
-        })
-        .catch((error) => {
-          console.log('Error:', error);
-        });
-      });
-
-    });
-
-    // 카테고리 수정 및 삭제 버튼
-    document.addEventListener('DOMContentLoaded', function() {
-      var editCategoryBtn = document.querySelector('#update-category-btn');
-      var deleteCategoryBtn = document.querySelector('#delete-category-btn');
-      console.log(editCategoryBtn, deleteCategoryBtn);
-
-      var updateButtonsVisible = false;
-      var deleteButtonsVisible = false;
-
-      // 수정 버튼
-      if(editCategoryBtn) {
-        editCategoryBtn.addEventListener('click', function() {
-          updateButtonsVisible = !updateButtonsVisible;
-
-          if (deleteButtonsVisible) {
-            deleteButtonsVisible = false;
-            deleteCategoryBtn.textContent = '삭제';
-            toggleButtons('.delete-category-sub-btn', 'none');
-          }
-
-          editCategoryBtn.textContent = updateButtonsVisible ? '취소' : '수정';
-          toggleButtons('.update-category-sub-btn', updateButtonsVisible ? 'block' : 'none');
-        });
-      }
-
-      // 삭제 버튼
-      if(deleteCategoryBtn) {
-        deleteCategoryBtn.addEventListener('click', function() {
-          deleteButtonsVisible = !deleteButtonsVisible;
-
-          if (updateButtonsVisible) {
-            updateButtonsVisible = false;
-            editCategoryBtn.textContent = '수정';
-            toggleButtons('.update-category-sub-btn', 'none');
-          }
-
-          deleteCategoryBtn.textContent = deleteButtonsVisible ? '취소' : '삭제';
-          toggleButtons('.delete-category-sub-btn', deleteButtonsVisible ? 'block' : 'none');
-        });
-      }
-
-      function toggleButtons(selector, displayStyle) {
-        document.querySelectorAll(selector).forEach(function(button) {
-          button.style.display = displayStyle;
-        });
-      }
-
-      // 카테고리 삭제
-      document.querySelectorAll('.delete-category-sub-btn').forEach(function(button) {
-        button.addEventListener('click', function() {
-          var categoryId = this.getAttribute('data-category-id');
-          fetch('/category/' + categoryId + '/delete/', {
+      
+          fetch("{% url 'category_create' %}", { // Django에서 지정한 URL을 가져옴
             method: 'POST',
+            body: formData,
             headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'X-CSRFToken': '{{ csrf_token }}'
+              'X-CSRFToken': '{{ csrf_token }}', 
             },
-          }).then(function() {
+          })
+          .then(response => {
+            if (!response.ok) {
+              return response.json().then(json => {
+                if (json.errors === "Maximum number of categories reached") {
+                  alert("최대 카테고리 개수를 초과했습니다.");
+                } else if (json.errors === "Category name already exists") {
+                  alert("이미 존재하는 카테고리 이름입니다.");
+                } else {
+                  alert(json.errors || "카테고리를 추가하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
+              });
+            } 
+            return response.json();
+          })
+          .then(json => {
             location.reload();
+          })
+          .catch((error) => {
+            console.log('Error:', error);
+          });
+        });
+
+
+        // 카테고리 수정
+        document.querySelector("#update-category-btn-modal").addEventListener('click', function(){
+          var formElement = document.querySelector("#update-category-form");
+          var formData = new FormData(formElement);
+          var categoryId = formElement.getAttribute("data-category-id");
+          var updateUrl = "{% url 'category_update' category_id=0 %}".replace('0', categoryId);
+
+          fetch(updateUrl, { // Django에서 지정한 URL을 가져옴
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-CSRFToken': '{{ csrf_token }}',
+            },
+          })
+          .then(response => {
+            if (!response.ok) {
+              return response.json().then(json => {
+                if (json.errors === "Category name already exists") {
+                  alert("이미 존재하는 카테고리 이름입니다.");
+                } else {
+                  alert(json.errors || "카테고리를 수정하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
+              });
+            }
+            return response.json();
+          })
+          .then(json => {
+            location.reload();
+          })
+          .catch((error) => {
+            console.log('Error:', error);
+          });
+        });
+
+      });
+
+      // 카테고리 수정 및 삭제 버튼
+      document.addEventListener('DOMContentLoaded', function() {
+        var editCategoryBtn = document.querySelector('#update-category-btn');
+        var deleteCategoryBtn = document.querySelector('#delete-category-btn');
+
+        var updateButtonsVisible = false;
+        var deleteButtonsVisible = false;
+
+        // 수정 버튼
+        if(editCategoryBtn) {
+          editCategoryBtn.addEventListener('click', function() {
+            updateButtonsVisible = !updateButtonsVisible;
+
+            if (deleteButtonsVisible) {
+              deleteButtonsVisible = false;
+              deleteCategoryBtn.textContent = '삭제';
+              toggleButtons('.delete-category-sub-btn', 'none');
+            }
+
+            editCategoryBtn.textContent = updateButtonsVisible ? '취소' : '수정';
+            toggleButtons('.update-category-sub-btn', updateButtonsVisible ? 'block' : 'none');
+          });
+        }
+
+        // 삭제 버튼
+        if(deleteCategoryBtn) {
+          deleteCategoryBtn.addEventListener('click', function() {
+            deleteButtonsVisible = !deleteButtonsVisible;
+
+            if (updateButtonsVisible) {
+              updateButtonsVisible = false;
+              editCategoryBtn.textContent = '수정';
+              toggleButtons('.update-category-sub-btn', 'none');
+            }
+
+            deleteCategoryBtn.textContent = deleteButtonsVisible ? '취소' : '삭제';
+            toggleButtons('.delete-category-sub-btn', deleteButtonsVisible ? 'block' : 'none');
+          });
+        }
+
+        function toggleButtons(selector, displayStyle) {
+          document.querySelectorAll(selector).forEach(function(button) {
+            button.style.display = displayStyle;
+          });
+        }
+
+        // 카테고리 삭제
+        document.querySelectorAll('.delete-category-sub-btn').forEach(function(button) {
+          button.addEventListener('click', function() {
+            var categoryId = this.getAttribute('data-category-id');
+            fetch('/category/' + categoryId + '/delete/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+              },
+            }).then(function() {
+              location.reload();
+            });
+          });
+        });
+
+        // 카테고리 수정
+        document.querySelectorAll('.update-category-sub-btn').forEach(function(button) {
+          button.addEventListener('click', function() {
+            var categoryId = this.getAttribute('data-category-id');
+
+            const categoryInfo = currentUserCategories.find(function(category) {
+              return category.pk == categoryId;
+            });
+
+            document.querySelector("#update-category-form").setAttribute("data-category-id", categoryId);
+
+            // 모달에 정보 채우기
+            document.querySelector('#update-category-is-public').value = categoryInfo.fields.is_public.toString();
+            document.querySelector('#update-category-name').value = categoryInfo.fields.name;
+            document.querySelector('#update-category-description').value = categoryInfo.fields.description;
+
+            // 모달 표시
+            var updateModal = new bootstrap.Modal(document.getElementById('update-create-modal'));
+            updateModal.show();
           });
         });
       });
 
-      // 카테고리 수정
-      document.querySelectorAll('.update-category-sub-btn').forEach(function(button) {
-        button.addEventListener('click', function() {
-          var categoryId = this.getAttribute('data-category-id');
+      // Category 모양 변경
+      document.addEventListener('DOMContentLoaded', function() {
+        const categoryButtons = document.getElementById('categoryButtons'); 
+        const categoryCaretIcon = document.getElementById('category-caret-icon');
 
-          const categoryInfo = currentUserCategories.find(function(category) {
-            return category.pk == categoryId;
-          });
+        categoryButtons.addEventListener('show.bs.collapse', function() {
+          categoryCaretIcon.src = "{% static 'bootstrap-icons-1.10.5/caret-up-fill.svg' %}";
+        });
 
-          document.querySelector("#update-category-form").setAttribute("data-category-id", categoryId);
-
-          // 모달에 정보 채우기
-          document.querySelector('#update-category-is-public').value = categoryInfo.fields.is_public.toString();
-          document.querySelector('#update-category-name').value = categoryInfo.fields.name;
-          document.querySelector('#update-category-description').value = categoryInfo.fields.description;
-
-          // 모달 표시
-          var updateModal = new bootstrap.Modal(document.getElementById('update-create-modal'));
-          updateModal.show();
+        categoryButtons.addEventListener('hide.bs.collapse', function() { 
+          categoryCaretIcon.src = "{% static 'bootstrap-icons-1.10.5/caret-down-fill.svg' %}";
         });
       });
-    });
-
-    // Category 모양 변경
-    document.addEventListener('DOMContentLoaded', function() {
-      const categoryButtons = document.getElementById('categoryButtons'); 
-      const categoryCaretIcon = document.getElementById('category-caret-icon');
-
-      categoryButtons.addEventListener('show.bs.collapse', function() {
-        categoryCaretIcon.src = "{% static 'bootstrap-icons-1.10.5/caret-up-fill.svg' %}";
-      });
-
-      categoryButtons.addEventListener('hide.bs.collapse', function() { 
-        categoryCaretIcon.src = "{% static 'bootstrap-icons-1.10.5/caret-down-fill.svg' %}";
-      });
-    });
+    }
+    
     </script>
 </html>

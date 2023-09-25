@@ -159,6 +159,10 @@ def category_create(request):
 
 def category_list(request):
     categories = Category.objects.filter(is_public=True)
+    for category in categories:
+        category.subscriber_count = CategorySubscription.objects.filter(
+            category=category).count()
+
     context = {
         'categories': categories,
     }
@@ -172,15 +176,18 @@ def category_detail(request, category_id):
     selected_category.subscriber_count = CategorySubscription.objects.filter(
         category=selected_category).count()  # selected_category에 대한 subscriber_count 계산
 
-    is_subscribed = CategorySubscription.objects.filter(
-        user=request.user, category=selected_category).exists()
+    category_is_subscribed = False  # 기본값을 False로 설정
+    if request.user.is_authenticated:  # 로그인한 경우에만 is_subscribed 조회
+        category_is_subscribed = CategorySubscription.objects.filter(
+            user=request.user, category=selected_category).exists()
 
     classifications = Classification.objects.filter(
         category=selected_category).order_by('name')
+
     context = {
         'category': selected_category,
         'classifications': classifications,
-        'is_subscribed': is_subscribed
+        'category_is_subscribed': category_is_subscribed
     }
     return render(request, 'category.html', context)
 
@@ -216,8 +223,11 @@ def category_delete(request, category_id):
         return JsonResponse({'status': 'error', 'message': '카테고리를 찾을 수 없습니다.'}, status=404)
 
 
-@login_required
+@require_POST
 def category_subscribe(request, category_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({'status': 'forbidden'}, status=403)
+
     selected_category = get_object_or_404(Category, pk=category_id)
     subscription, created = CategorySubscription.objects.get_or_create(
         user=request.user, category=selected_category)

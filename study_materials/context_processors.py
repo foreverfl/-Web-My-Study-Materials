@@ -39,7 +39,6 @@ def common_context(request):
         'subscribed_categories': subscribed_categories,
         'admin_categories': admin_categories,
         'subscription': subscription,
-
     }
 
     return context
