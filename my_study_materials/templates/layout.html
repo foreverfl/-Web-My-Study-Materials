@@ -121,25 +121,35 @@
               <hr>
               {% endif %}
 
-              <!--User Category -->
+              <!-- User Category -->
               <p class="fw-bold d-flex justify-content-center">My Categories</p>
-              {% for category in current_user_categories %}
-              <li class="sidebar-category nav-item rounded d-flex justify-content-center">
-                  <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
-                  <button class="btn btn-sm btn-secondary update-category-sub-btn-mobile" data-category-id="{{ category.id }}" style="display: none;">수정</button>
-                  <button class="btn btn-sm btn-danger delete-category-sub-btn-mobile" data-category-id="{{ category.id }}" style="display: none;">삭제</button>
-              </li>
-              {% endfor %}
+              {% if user.is_authenticated %}                
+                {% for category in current_user_categories %}
+                <li class="sidebar-category nav-item rounded d-flex justify-content-center">
+                    <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
+                    <button class="btn btn-sm btn-danger delete-category-sub-btn-mobile" data-category-id="{{ category.id }}" style="display: none;">삭제</button>
+                    <button class="btn btn-sm btn-secondary update-category-sub-btn-mobile" data-category-id="{{ category.id }}" style="display: none;">수정</button>
+                </li>
+                {% endfor %}
+              {% endif %}
 
               <hr>
 
               <!-- Added Categories (default: Admin Category)-->
               <p class="fw-bold d-flex justify-content-center">Added Categories</p>
-              {% for category in admin_categories %}
-              <li class="sidebar-category nav-item rounded d-flex justify-content-center">
-                  <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
-              </li>
-              {% endfor %}
+              {% if user.is_authenticated %}
+                  {% for category in subscribed_categories %}
+                  <li class="sidebar-category nav-item rounded d-flex justify-content-center">
+                      <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
+                  </li>
+                  {% endfor %}
+              {% else %}
+                  {% for category in admin_categories %}
+                  <li class="sidebar-category nav-item rounded d-flex justify-content-center">
+                      <a class="nav-link" href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
+                  </li>
+                  {% endfor %}
+              {% endif %}
 
               <hr>
 
@@ -401,6 +411,8 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4751026650729929"
     crossorigin="anonymous"></script>
   <script>
+    const currentUserCategories = {{ current_user_categories_json|safe }};
+
     // 카테고리 추가 및 수정
     document.addEventListener('DOMContentLoaded', function(){
       
@@ -485,6 +497,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       var editCategoryBtn = document.querySelector('#update-category-btn');
       var deleteCategoryBtn = document.querySelector('#delete-category-btn');
+      console.log(editCategoryBtn, deleteCategoryBtn);
 
       var updateButtonsVisible = false;
       var deleteButtonsVisible = false;
