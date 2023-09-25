@@ -1,12 +1,14 @@
+/* English */
 @font-face {
-  font-family: "Kanit"; /* 사용자 지정 이름 */
+  font-family: "Kanit";
   src: url("../fonts/IndieFlower-Regular.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
 
+/* Korean */
 @font-face {
-  font-family: "Noto Sans KR", sans-serif; /* 사용자 지정 이름 */
+  font-family: "Noto Sans KR", sans-serif;
   src: url("../fonts/NotoSansKR-Light.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;

@@ -9,10 +9,10 @@
 <div class="container h-100 d-flex justify-content-center align-items-center">
     <div class="text-center card my-3" style="max-width: 25rem;">
         <div class="card-header">
-            <h1>로그아웃</h1>
+            <h1 class="navbar-brand">My Study Materials</h1>
         </div>
-        <div class="card-body">
-            <p>로그아웃 하시겠습니까?</p>
+        <div class="card-body m-3">
+            <p class="fs-4">로그아웃 하시겠습니까?</p>
             <form method="post" action="{% url 'account_logout' %}">
                 {% csrf_token %}
                 {% if redirect_field_value %}
